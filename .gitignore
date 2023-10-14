@@ -1,0 +1,10 @@
+
+/node_modules/*
+node_modules/*
+
+#idea-ide
+/.idea/*
+
+/src/users-next.ts
+
+dist

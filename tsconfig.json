@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "alwaysStrict": true,
+    "baseUrl": "./src",
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "isolatedModules": true,
+    "lib": [
+      "es6",
+      "es2016",
+      "es2017",
+      "es2021",
+      "dom"
+    ],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedParameters": true,
+    "outDir": "./dist",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": false,
+    "strictFunctionTypes": false,
+    "strictNullChecks": true,
+    "target": "es6"
+  },
+  "include": [
+    "./src/hotkeys.ts",
+    "./src/**/*.ts"
+  ],
+  "exclude": [
+    "dist",
+    "bin",
+    "node_modules"
+  ]
+}
