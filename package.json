@@ -1,6 +1,6 @@
 {
   "name": "@ainias42/users-next",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "User Management for nextjs",
   "main": "dist/users-next",
   "scripts": {
