@@ -1,4 +1,4 @@
-import create from 'zustand';
+import { create } from 'zustand';
 import { persist, PersistOptions } from 'zustand/middleware';
 
 type SetState<Type> = (

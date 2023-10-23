@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { User } from '../../UserManagement/models/User';
 import { PrepareOptions } from './PrepareOptions';
-import { prepareServer } from './prepareServer';
+import { checkServer } from './checkServer';
+import { DeviceWithUser } from '../../UserManagement/models/DeviceWithUser';
 
-export async function checkUser(
+export async function checkApi(
     data: {
         req: NextApiRequest;
         res: NextApiResponse;
@@ -14,7 +14,7 @@ export async function checkUser(
     },
 ): Promise<undefined>;
 
-export async function checkUser(
+export async function checkApi(
     data: {
         req: NextApiRequest;
         res: NextApiResponse;
@@ -24,8 +24,8 @@ export async function checkUser(
         needsUser?: false;
         accesses?: undefined;
     },
-): Promise<User | undefined>;
-export async function checkUser(
+): Promise<DeviceWithUser | undefined>;
+export async function checkApi(
     data: {
         req: NextApiRequest;
         res: NextApiResponse;
@@ -38,8 +38,8 @@ export async function checkUser(
           }
         | string
         | string[],
-): Promise<User>;
-export async function checkUser(
+): Promise<DeviceWithUser>;
+export async function checkApi(
     {
         req,
         res,
@@ -57,6 +57,5 @@ export async function checkUser(
                   accesses: options,
               }
             : options;
-    const device = await prepareServer(req, res, realOptions);
-    return device?.user;
+    return checkServer(req, res, realOptions);
 }

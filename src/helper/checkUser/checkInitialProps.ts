@@ -1,10 +1,10 @@
 import { NextPageContext } from 'next';
 import { PrepareOptions } from './PrepareOptions';
-import { prepareServer } from './prepareServer';
+import { checkServer } from './checkServer';
 import { useUserData } from '../../UserManagement/useUserData';
 import { User } from '../../UserManagement/models/User';
 
-export async function prepareInitialProps(
+export async function checkInitialProps(
     data: Pick<NextPageContext, 'res' | 'req'>,
     options: {
         validateUser: false;
@@ -12,7 +12,7 @@ export async function prepareInitialProps(
     },
 ): Promise<undefined>;
 
-export async function prepareInitialProps(
+export async function checkInitialProps(
     data: Pick<NextPageContext, 'res' | 'req'>,
     options?: {
         validateUser: true;
@@ -20,7 +20,7 @@ export async function prepareInitialProps(
         accesses?: undefined;
     },
 ): Promise<User | undefined>;
-export async function prepareInitialProps(
+export async function checkInitialProps(
     data: Pick<NextPageContext, 'res' | 'req'>,
     options?:
         | {
@@ -32,7 +32,7 @@ export async function prepareInitialProps(
         | string[],
 ): Promise<User>;
 
-export async function prepareInitialProps(
+export async function checkInitialProps(
     { req, res }: Pick<NextPageContext, 'res' | 'req'>,
     options: PrepareOptions | string | string[] = { validateUser: true },
 ) {
@@ -47,7 +47,7 @@ export async function prepareInitialProps(
 
     // Server
     if (req && res) {
-        const device = await prepareServer(req, res, realOptions);
+        const device = await checkServer(req, res, realOptions);
         return device?.user;
     }
 

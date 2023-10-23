@@ -5,9 +5,10 @@
   "main": "dist/users-next",
   "scripts": {
     "build": "node bin/build.js & tsc",
-    "update packages": "npm run build && node bin/updateCopies.js",
+    "update packages": "npm run build && npm run build && node bin/updateCopies.js",
     "typecheck": "tsc --noEmit",
-    "eslint": "eslint --cache \"src/{**/*,*}.{js,jsx,tsx,ts}\"",
+    "eslint:no-cache": "eslint \"src/{**/*,*}.{js,jsx,tsx,ts}\"",
+    "eslint": "npm run eslint:no-cache -- --cache",
     "eslint:fix": "npm run eslint -- --fix"
   },
   "keywords": [],
@@ -28,17 +29,19 @@
     "eslint-plugin-react": "^7.33.2",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2",
-    "typeorm": "git@github.com:Ainias/typeorm.git#deployment3",
-    "@ainias42/js-helper": "^0.8.9"
+    "typeorm": "git@github.com:Ainias/typeorm.git#deployment3"
   },
-  "dependencies": {},
-  "peerDependencies": {
-    "typeorm": "^0.3.17",
-    "@ainias42/typeorm-sync": "^0.2.5",
-    "next": "^13.5.4",
+  "dependencies": {
     "jose": "^4.15.3",
     "cookies-next": "^4.0.0",
-    "zustand": "^4.4.3",
-    "@ainias42/js-helper": "^0.8.9"
+    "zustand": "^4.4.3"
+  },
+  "peerDependencies": {
+    "typeorm": "^0.3.17",
+    "@ainias42/typeorm-sync": ">=0.2.6",
+    "next": ">=13.5.4",
+    "@ainias42/js-helper": ">=0.8.10",
+    "@ainias42/react-bootstrap-mobile": ">=0.1.21",
+    "react": ">=18.2.0"
   }
 }

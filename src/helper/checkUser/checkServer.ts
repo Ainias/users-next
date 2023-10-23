@@ -5,20 +5,11 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { PrepareOptions } from './PrepareOptions';
 import { setServerUser } from '../../UserManagement/useUser';
 
-export async function prepareServer(
+export async function checkServer(
     req: NextApiRequest | IncomingMessage,
     res: NextApiResponse | ServerResponse,
     options: PrepareOptions,
 ) {
-    if (!UserManager.getInstance()) {
-        if (!process.env.USERS_NEXT_PEPPER || !process.env.USERS_NEXT_JWT_SECRET) {
-            throw new Error(
-                'You need to set USERS_NEXT_PEPPER and USERS_NEXT_JWT_SECRET env variables for this module to work!',
-            );
-        }
-        UserManager.init(process.env.USERS_NEXT_PEPPER, process.env.USERS_NEXT_JWT_SECRET);
-    }
-
     if (options.validateUser) {
         const userManager = UserManager.getInstance();
         const token = getCookie('token', { req, res }) as string;

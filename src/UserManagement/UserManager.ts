@@ -1,5 +1,5 @@
 import { User } from './models/User';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { GlobalRef } from '../GlobalRef';
 import { EncryptJWT, jwtDecrypt, JWTPayload } from 'jose';
 import { Device } from './models/Device';
@@ -30,11 +30,15 @@ class UserManager {
         this.jwtSecret = jwtSecret;
     }
 
-    static init(pepper: string, jwtSecret: string, config?: Partial<UserManagerConfig>) {
-        this.instance = new UserManager(pepper, jwtSecret, config);
-    }
-
     static getInstance() {
+        if (!this.instance) {
+            if (!process.env.USERS_NEXT_PEPPER || !process.env.USERS_NEXT_JWT_SECRET) {
+                throw new Error(
+                    'You need to set USERS_NEXT_PEPPER and USERS_NEXT_JWT_SECRET env variables for this module to work!',
+                );
+            }
+            this.instance = new UserManager(process.env.USERS_NEXT_PEPPER, process.env.USERS_NEXT_JWT_SECRET);
+        }
         return this.instance;
     }
 
