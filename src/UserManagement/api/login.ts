@@ -45,7 +45,7 @@ export async function login(
     }
 
     if (token && user) {
-        UserManager.setToken(token, req, res);
+        UserManager.setToken(token, user.id ?? -1, req, res);
         const accesses = (await UserManager.findAccessesForUserId(user?.id ?? -1)).map((a) => a.name);
 
         res.status(200).json({

@@ -3,6 +3,7 @@ import * as React from 'react';
 import { useCallback, useState } from 'react';
 import { Block, Button, Input, Text, withMemo } from '@ainias42/react-bootstrap-mobile';
 import { LoginResponseData } from '../api/login';
+import { useUser } from '../useUser';
 
 export type LoginFormProps = { login: (email: string, password: string) => Promise<LoginResponseData> };
 
@@ -14,7 +15,9 @@ export const LoginForm = withMemo(function LoginForm({ login }: LoginFormProps) 
     const [password, setPassword] = useState('');
     const setUser = useUserData((s) => s.setUser);
     const setAccesses = useUserData((s) => s.setAccesses);
-    const user = useUserData((s) => s.user);
+    const user = useUser();
+
+    console.log('LOG-d user', user);
 
     // Dispatch
 

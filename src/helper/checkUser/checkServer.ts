@@ -16,7 +16,7 @@ export async function checkServer(
         if (token) {
             try {
                 const [newToken, device] = await userManager.validateToken(token);
-                UserManager.setToken(newToken, req, res);
+                UserManager.setToken(newToken, device.user?.id ?? -1, req, res);
 
                 // TODO cache accesses?
                 if (options.accesses) {
@@ -40,10 +40,14 @@ export async function checkServer(
                 return device;
             } catch (e) {
                 console.error('Got token error', e);
+                UserManager.deleteToken(req, res);
                 throw e;
             }
-        } else if (options.needsUser) {
-            throw new Error('route needs user, but no token given');
+        } else {
+            UserManager.deleteToken(req, res);
+            if (options.needsUser) {
+                throw new Error('route needs user, but no token given');
+            }
         }
     }
     return undefined;

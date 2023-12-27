@@ -42,18 +42,32 @@ class UserManager {
         return this.instance;
     }
 
-    static setToken(token: string, req: NextApiRequest | IncomingMessage, res: NextApiResponse | ServerResponse) {
+    static setToken(
+        token: string,
+        userId: number,
+        req: NextApiRequest | IncomingMessage,
+        res: NextApiResponse | ServerResponse,
+    ) {
+        const time = 7 * 24 * 60 * 60;
         setCookie('token', token, {
             req,
             res,
             httpOnly: true,
-            maxAge: 7 * 24 * 60 * 60,
+            maxAge: time,
+            secure: process.env.NODE_ENV !== 'development',
+        });
+        setCookie('userId', userId, {
+            req,
+            res,
+            httpOnly: false,
+            maxAge: time,
             secure: process.env.NODE_ENV !== 'development',
         });
     }
 
-    static deleteToken(req: NextApiRequest, res: NextApiResponse) {
+    static deleteToken(req: NextApiRequest | IncomingMessage, res: NextApiResponse | ServerResponse) {
         deleteCookie('token', { req, res });
+        deleteCookie('userId', { req, res });
     }
 
     static getTokenPayload(device: Device) {
