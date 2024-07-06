@@ -21,11 +21,10 @@ export async function checkServer(
                 // TODO cache accesses?
                 if (options.accesses) {
                     const neededAccesses = Array.isArray(options.accesses) ? options.accesses : [options.accesses];
-                    const accesses = (await UserManager.findAccessesForUserId(device.user?.id ?? -1)).map(
-                        (a) => a.name,
-                    );
-                    const accessSet = new Set(accesses);
-                    if (neededAccesses.some((a) => !accessSet.has(a))) {
+                    if (!(await UserManager.hasAccesses(device.user?.id ?? 1, neededAccesses))) {
+                        const accesses = (await UserManager.findAccessesForUserId(device.user?.id ?? -1)).map(
+                            (a) => a.name,
+                        );
                         throw new Error(
                             `user with id ${device.user?.id} needed accesses '${neededAccesses.join(
                                 "', '",

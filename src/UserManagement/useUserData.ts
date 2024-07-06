@@ -7,10 +7,15 @@ const initialState = {
 };
 
 type SetState = (
-    newState: UserState | Partial<UserState> | ((state: UserState) => UserState | Partial<UserState>),
+    newState:
+        | UserState
+        | Partial<UserState & typeof initialState>
+        | ((
+              state: UserState & typeof initialState,
+          ) => (UserState & typeof initialState) | Partial<UserState & typeof initialState>),
     replace?: boolean,
 ) => void;
-type GetState = () => Readonly<UserState>;
+type GetState = () => Readonly<UserState> & typeof initialState;
 
 function getCookieUserId() {
     if (typeof window === 'undefined') {
@@ -25,17 +30,29 @@ function getCookieUserId() {
 }
 
 const actionsGenerator = (set: SetState, get: GetState) => ({
-    getUser() {
-        const { user } = get();
-        if (!user) {
-            return undefined;
+    checkUser() {
+        const { user, accesses } = get();
+        if (!user && accesses.length === 0) {
+            return;
         }
+
         const cookieUserId = getCookieUserId();
-        if (cookieUserId !== user.id) {
-            set({ user: undefined });
-            return undefined;
+        if (!cookieUserId || cookieUserId !== user?.id) {
+            set((old) => ({
+                user: old.user ? undefined : old.user,
+                accesses: old.accesses.length ? [] : old.accesses,
+            }));
         }
+    },
+    getUser() {
+        get().checkUser();
+        const { user } = get();
         return user;
+    },
+    getAccesses() {
+        get().checkUser();
+        const { accesses } = get();
+        return accesses;
     },
     setUser(user: User | undefined) {
         set({ user });
@@ -43,16 +60,13 @@ const actionsGenerator = (set: SetState, get: GetState) => ({
     setAccesses(accesses: string[]) {
         set({ accesses });
     },
-    clear() {
-        set({ ...actionsGenerator(set, get) }, true);
-    },
 });
 
-export type UserState = typeof initialState & ReturnType<typeof actionsGenerator>;
+export type UserState = ReturnType<typeof actionsGenerator>;
 export const useUserData = createZustand<UserState>(
     (set, get) => ({
         ...initialState,
-        ...actionsGenerator(set, get),
+        ...actionsGenerator(set, get as GetState),
     }),
     {
         name: 'user',
@@ -64,7 +78,12 @@ export const useUserData = createZustand<UserState>(
                 }
                 return window.localStorage.getItem(...args);
             },
-            setItem: (...args) => window.localStorage.setItem(...args),
+            setItem: (...args) => {
+                if (typeof window === 'undefined') {
+                    return;
+                }
+                window.localStorage.setItem(...args);
+            },
             removeItem: (...args) => window.localStorage.removeItem(...args),
         }),
     },

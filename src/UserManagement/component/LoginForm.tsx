@@ -17,8 +17,6 @@ export const LoginForm = withMemo(function LoginForm({ login }: LoginFormProps) 
     const setAccesses = useUserData((s) => s.setAccesses);
     const user = useUser();
 
-    console.log('LOG-d user', user);
-
     // Dispatch
 
     // Callbacks

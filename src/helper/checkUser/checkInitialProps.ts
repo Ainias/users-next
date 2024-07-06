@@ -52,20 +52,21 @@ export async function checkInitialProps(
     }
 
     // Client
-    if (realOptions.validateUser && realOptions.needsUser && !useUserData.getState().user) {
+    if (realOptions.validateUser && realOptions.needsUser && !useUserData.getState().getUser()) {
         // TODO change error to UserError/ValidationError
         throw new Error('user not logged in, but route need logged in user!');
     }
     if (realOptions.accesses) {
         const neededAccesses = Array.isArray(realOptions.accesses) ? realOptions.accesses : [realOptions.accesses];
-        const accessSet = new Set(useUserData.getState().accesses);
+        const accessSet = new Set(useUserData.getState().getAccesses());
         if (neededAccesses.some((a) => !accessSet.has(a))) {
             throw new Error(
                 `user needed accesses '${neededAccesses.join("', '")}' but got accesses '${useUserData
                     .getState()
-                    .accesses.join("', '")}'`,
+                    .getAccesses()
+                    .join("', '")}'`,
             );
         }
     }
-    return useUserData.getState().user;
+    return useUserData.getState().getUser();
 }

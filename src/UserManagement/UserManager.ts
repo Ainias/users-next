@@ -49,6 +49,8 @@ class UserManager {
         res: NextApiResponse | ServerResponse,
     ) {
         const time = 7 * 24 * 60 * 60;
+
+        // HTTP-Only or a XXS attack can steal the token
         setCookie('token', token, {
             req,
             res,
@@ -56,6 +58,7 @@ class UserManager {
             maxAge: time,
             secure: process.env.NODE_ENV !== 'development',
         });
+
         setCookie('userId', userId, {
             req,
             res,
@@ -101,6 +104,12 @@ class UserManager {
             await Promise.all(user.roles.map((role) => RoleManager.findAccessesForRole(role))),
         );
         return accessesForRoles.flat();
+    }
+
+    static async hasAccesses(userId: number, accessNames: string[]) {
+        const accesses = (await UserManager.findAccessesForUserId(userId)).map((a) => a.name);
+        const accessSet = new Set(accesses);
+        return accessNames.every((a) => accessSet.has(a));
     }
 
     hashPassword(user: User, password: string) {

@@ -34,11 +34,11 @@
   "dependencies": {
     "jose": "^4.15.3",
     "cookies-next": "^4.0.0",
-    "zustand": "^4.4.3"
+    "zustand": "^4.5.2"
   },
   "peerDependencies": {
     "typeorm": "^0.3.17",
-    "@ainias42/typeorm-sync": ">=0.2.7",
+    "@ainias42/typeorm-sync": ">=0.2.9",
     "next": ">=13.5.4",
     "@ainias42/js-helper": ">=0.8.10",
     "@ainias42/react-bootstrap-mobile": ">=0.1.21",
