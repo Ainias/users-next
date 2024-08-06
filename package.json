@@ -43,7 +43,7 @@
   },
   "peerDependencies": {
     "typeorm": "^0.3.20",
-    "@ainias42/typeorm-sync": ">=0.2.10",
+    "@ainias42/typeorm-sync": ">=0.2.11",
     "next": ">=13.5.4",
     "@ainias42/js-helper": ">=0.8.10",
     "@ainias42/react-bootstrap-mobile": ">=0.1.21",
