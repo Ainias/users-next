@@ -4,9 +4,9 @@ import { GlobalRef } from '../../GlobalRef';
 import { Role } from './Role';
 import { Device } from './Device';
 
-@Entity()
+@Entity('user')
 class User extends SyncModel {
-    @Column()
+    @Column({ unique: true })
     username: string;
 
     @Column({ unique: true })

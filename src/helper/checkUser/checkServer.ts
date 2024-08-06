@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { IncomingMessage, ServerResponse } from 'http';
 import { PrepareOptions } from './PrepareOptions';
 import { setServerUser } from '../../UserManagement/useUser';
+import { AuthorizationError } from '../../UserManagement/error/AuthorizationError';
 
 export async function checkServer(
     req: NextApiRequest | IncomingMessage,
@@ -25,7 +26,7 @@ export async function checkServer(
                         const accesses = (await UserManager.findAccessesForUserId(device.user?.id ?? -1)).map(
                             (a) => a.name,
                         );
-                        throw new Error(
+                        throw new AuthorizationError(
                             `user with id ${device.user?.id} needed accesses '${neededAccesses.join(
                                 "', '",
                             )}' but got accesses '${accesses.join("', '")}'`,
@@ -39,7 +40,10 @@ export async function checkServer(
                 return device;
             } catch (e) {
                 console.error('Got token error', e);
-                UserManager.deleteToken(req, res);
+                // Authorisation error should not delete the token, as the user is the user, but does not have the correct rights
+                if (!(e instanceof AuthorizationError)) {
+                    UserManager.deleteToken(req, res);
+                }
                 throw e;
             }
         } else {

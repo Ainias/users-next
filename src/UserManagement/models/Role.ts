@@ -1,9 +1,9 @@
-import {Column, Entity, JoinTable, ManyToMany} from 'typeorm';
-import {SyncModel} from '@ainias42/typeorm-sync';
-import {GlobalRef} from '../../GlobalRef';
-import {Access} from "./Access";
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
+import { SyncModel } from '@ainias42/typeorm-sync';
+import { GlobalRef } from '../../GlobalRef';
+import { Access } from './Access';
 
-@Entity()
+@Entity('role')
 class Role extends SyncModel {
     @Column()
     name: string;
@@ -11,19 +11,19 @@ class Role extends SyncModel {
     @Column()
     description: string;
 
-    @ManyToMany(() => Role, role => role.children)
+    @ManyToMany(() => Role, (role) => role.children)
     @JoinTable({
-        name: "roleChildren",
-        joinColumn: {name: "parentId", referencedColumnName: "id"},
-        inverseJoinColumn: {name: "childId", referencedColumnName: "id"}
+        name: 'roleChildren',
+        joinColumn: { name: 'parentId', referencedColumnName: 'id' },
+        inverseJoinColumn: { name: 'childId', referencedColumnName: 'id' },
     })
     parents: Role[];
 
-    @ManyToMany(() => Role, role => role.parents)
+    @ManyToMany(() => Role, (role) => role.parents)
     children: Role[];
 
     @ManyToMany(() => Access)
-    @JoinTable({name: "roleAccess"})
+    @JoinTable({ name: 'roleAccess' })
     accesses?: Access[];
 }
 
@@ -33,4 +33,4 @@ if (!Saved.value()) {
 }
 const GlobalRole = Saved.typedValue();
 type GlobalRole = Role;
-export {GlobalRole as Role};
+export { GlobalRole as Role };

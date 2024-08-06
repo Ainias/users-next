@@ -1,10 +1,9 @@
-import {Column, Entity} from 'typeorm';
-import {SyncModel} from '@ainias42/typeorm-sync';
-import {GlobalRef} from '../../GlobalRef';
+import { Column, Entity } from 'typeorm';
+import { SyncModel } from '@ainias42/typeorm-sync';
+import { GlobalRef } from '../../GlobalRef';
 
-@Entity()
+@Entity('access')
 class Access extends SyncModel {
-
     @Column()
     name: string;
 
@@ -18,4 +17,4 @@ if (!Saved.value()) {
 }
 const GlobalAccess = Saved.typedValue();
 type GlobalAccess = Access;
-export {GlobalAccess as Access};
+export { GlobalAccess as Access };
