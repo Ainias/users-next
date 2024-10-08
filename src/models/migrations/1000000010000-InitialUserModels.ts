@@ -1,14 +1,16 @@
 /* eslint-disable class-methods-use-this */
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
-import { getCreateTableColumns } from '@ainias42/typeorm-sync';
+import { getCreateTableColumnsV1 } from '@ainias42/typeorm-helper';
 
 export class InitialUserModels1000000010000 implements MigrationInterface {
+    name = 'InitialUserModels1000000010000';
+
     async up(queryRunner: QueryRunner) {
         await queryRunner.createTable(
             new Table({
                 name: 'access',
                 columns: [
-                    ...getCreateTableColumns(),
+                    ...getCreateTableColumnsV1(),
                     { name: 'name', type: 'varchar', isNullable: false },
                     { name: 'description', type: 'varchar', isNullable: false },
                 ],
@@ -18,7 +20,7 @@ export class InitialUserModels1000000010000 implements MigrationInterface {
             new Table({
                 name: 'role',
                 columns: [
-                    ...getCreateTableColumns(),
+                    ...getCreateTableColumnsV1(),
                     { name: 'name', type: 'varchar', isNullable: false },
                     { name: 'description', type: 'varchar', isNullable: false },
                 ],
@@ -115,7 +117,7 @@ export class InitialUserModels1000000010000 implements MigrationInterface {
             new Table({
                 name: 'user',
                 columns: [
-                    ...getCreateTableColumns(),
+                    ...getCreateTableColumnsV1(),
                     { name: 'username', type: 'varchar', isNullable: false, isUnique: true },
                     { name: 'password', type: 'varchar', isNullable: false },
                     { name: 'email', type: 'varchar', isNullable: false, isUnique: true },
@@ -188,7 +190,7 @@ export class InitialUserModels1000000010000 implements MigrationInterface {
             new Table({
                 name: 'device',
                 columns: [
-                    ...getCreateTableColumns(),
+                    ...getCreateTableColumnsV1(),
                     { name: 'userAgent', type: 'varchar', isNullable: false },
                     { name: 'lastActive', type: 'datetime', isNullable: false },
                     { name: 'userId', type: 'int', isNullable: false },

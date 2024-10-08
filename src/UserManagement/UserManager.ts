@@ -1,24 +1,23 @@
-import { User } from './models/User';
+import { User } from '../models/User';
 import * as crypto from 'crypto';
-import { GlobalRef } from '../GlobalRef';
 import { EncryptJWT, jwtDecrypt, JWTPayload } from 'jose';
-import { Device } from './models/Device';
-import { getSyncRepository } from '@ainias42/typeorm-sync';
-import { deleteCookie, setCookie } from 'cookies-next';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { Device } from '../models/Device';
 import { RoleManager } from './RoleManager';
-import { IncomingMessage, ServerResponse } from 'http';
 import { ArrayHelper } from '@ainias42/js-helper';
+import { getRepository } from '@ainias42/typeorm-helper';
+import type { Response } from 'express';
+import { DeviceWithUser } from '../models/DeviceWithUser';
 
 const defaultUserManagerConfig = {
     saltLength: 12,
     expiresIn: '7d',
+    activateTokenExpiresIn: '1d',
     recheckPasswordAfterSeconds: 60 * 5,
     userNeedsToBeActivated: true,
 };
 export type UserManagerConfig = typeof defaultUserManagerConfig;
 
-class UserManager {
+export class UserManager {
     private static instance: UserManager;
     private config = { ...defaultUserManagerConfig };
     private readonly pepper: string;
@@ -42,35 +41,26 @@ class UserManager {
         return this.instance;
     }
 
-    static setToken(
-        token: string,
-        userId: number,
-        req: NextApiRequest | IncomingMessage,
-        res: NextApiResponse | ServerResponse,
-    ) {
-        const time = 7 * 24 * 60 * 60;
+    static setToken(token: string, userId: number, res: Response) {
+        const time = 1000 * 60 * 60 * 24 * 7;
 
         // HTTP-Only or a XXS attack can steal the token
-        setCookie('token', token, {
-            req,
-            res,
+        res.cookie('token', token, {
             httpOnly: true,
             maxAge: time,
             secure: process.env.NODE_ENV !== 'development',
         });
 
-        setCookie('userId', userId, {
-            req,
-            res,
+        res.cookie('userId', userId, {
             httpOnly: false,
             maxAge: time,
             secure: process.env.NODE_ENV !== 'development',
         });
     }
 
-    static deleteToken(req: NextApiRequest | IncomingMessage, res: NextApiResponse | ServerResponse) {
-        deleteCookie('token', { req, res });
-        deleteCookie('userId', { req, res });
+    static deleteToken(res: Response) {
+        res.clearCookie('token');
+        res.clearCookie('userId');
     }
 
     static getTokenPayload(device: Device) {
@@ -95,7 +85,7 @@ class UserManager {
     }
 
     static async findAccessesForUserId(userId: number) {
-        const userRepository = getSyncRepository(User);
+        const userRepository = getRepository(User);
         const user = await userRepository.findOne({ where: { id: userId }, relations: ['roles', 'roles.accesses'] });
         if (!user?.roles) {
             return [];
@@ -125,11 +115,27 @@ class UserManager {
         return hash.digest('hex');
     }
 
-    async generateTokenFor(device: Device) {
+    generateTokenFor(device: Device) {
         return new EncryptJWT(UserManager.getTokenPayload(device))
             .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
             .setIssuedAt()
             .setExpirationTime(this.config.expiresIn)
+            .encrypt(new TextEncoder().encode(this.jwtSecret));
+    }
+
+    generateActivateToken(user: User) {
+        return new EncryptJWT({ type: 'activate', userId: user.id, version: user.version })
+            .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
+            .setIssuedAt()
+            .setExpirationTime(this.config.activateTokenExpiresIn)
+            .encrypt(new TextEncoder().encode(this.jwtSecret));
+    }
+
+    generateResetPasswordToken(user: User) {
+        return new EncryptJWT({ type: 'reset-password', userId: user.id, version: user.version })
+            .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
+            .setIssuedAt()
+            .setExpirationTime(this.config.activateTokenExpiresIn)
             .encrypt(new TextEncoder().encode(this.jwtSecret));
     }
 
@@ -153,7 +159,7 @@ class UserManager {
                 relations: ['user'],
             };
 
-            const deviceRepository = getSyncRepository(Device);
+            const deviceRepository = getRepository(Device);
             const device = await deviceRepository.findOne(findOptions);
 
             if (!device) {
@@ -162,10 +168,11 @@ class UserManager {
             }
             device.lastActive = new Date();
             await deviceRepository.save(device);
-            return [await this.generateTokenFor(device), device] as const;
+            return [await this.generateTokenFor(device), device as DeviceWithUser] as const;
         }
 
         const device = new Device();
+        device.id = payload.deviceId;
         device.userAgent = payload.userAgent;
         device.lastActive = new Date(payload.lastActive);
         device.deletedAt = payload.deviceDeletedAt ? new Date(payload.deviceDeletedAt) : undefined;
@@ -184,7 +191,71 @@ class UserManager {
         device.user.createdAt = payload.userCreatedAt ? new Date(payload.userCreatedAt) : undefined;
         device.user.updatedAt = payload.userUpdatedAt ? new Date(payload.userUpdatedAt) : undefined;
 
-        return [token, device] as const;
+        return [token, device as DeviceWithUser] as const;
+    }
+
+    async activateUser(token: string) {
+        const { payload } = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret))) as unknown as {
+            payload: JWTPayload & { type: 'activate'; userId: number; version: number };
+        };
+        if (payload.type !== 'activate') {
+            // TODO better error
+            throw new Error('Wrong token type');
+        }
+        const userRepository = getRepository(User);
+        const user = await userRepository.findOneBy({ id: payload.userId });
+
+        if (!user) {
+            // TODO better error
+            throw new Error('User not found');
+        }
+
+        if (user.version !== payload.version) {
+            // TODO better error
+            throw new Error('Token is outdated!');
+        }
+
+        if (user.blocked) {
+            // TODO better error
+            throw new Error('User is blocked!');
+        }
+
+        user.activated = true;
+        await userRepository.save(user);
+        return user;
+    }
+
+    async resetPassword(token: string, newPassword: string) {
+        const { payload } = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret))) as unknown as {
+            payload: JWTPayload & { type: 'reset-password'; userId: number; version: number };
+        };
+        if (payload.type !== 'reset-password') {
+            // TODO better error
+            throw new Error('Wrong token type');
+        }
+
+        const userRepository = getRepository(User);
+        const user = await userRepository.findOneBy({ id: payload.userId });
+
+        if (!user) {
+            // TODO better error
+            throw new Error('User not found');
+        }
+
+        if (user.version !== payload.version) {
+            // TODO better error
+            throw new Error('Token is outdated!');
+        }
+
+        if (user.blocked) {
+            // TODO better error
+            throw new Error('User is blocked!');
+        }
+
+        user.activated = true;
+        user.password = this.hashPassword(user, newPassword);
+        await userRepository.save(user);
+        return user;
     }
 
     private generateSalt() {
@@ -195,10 +266,3 @@ class UserManager {
             .slice(0, length);
     }
 }
-
-const userManagerGlobalRef = new GlobalRef<typeof UserManager>('smd-mail.userManager');
-if (!userManagerGlobalRef.value()) {
-    userManagerGlobalRef.setValue(UserManager);
-}
-const val = userManagerGlobalRef.value() as typeof UserManager;
-export { val as UserManager };

@@ -1,0 +1,38 @@
+{
+  "registration": {
+    "success": "You are successfully registrated!. Please check your E-Mails."
+  },
+  "reset-password": {
+    "send": {
+      "label": "Set password"
+    },
+    "success": "Your password is successfully resetted!"
+  },
+  "user": {
+    "email": {
+      "label": "E-Mail"
+    },
+    "email-or-username": {
+      "label": "E-Mail or Username"
+    },
+    "logged-in": {
+      "already": "You are already logged in as {{user}}"
+    },
+    "login": {
+      "label": "Login"
+    },
+    "password": {
+      "label": "Password",
+      "repeat": {
+        "label": "Repeat password"
+      }
+    },
+    "registration": {
+      "label": "Create Account"
+    },
+    "username": {
+      "invalid-signs": "The username should consist only of alphanumeric letters, _ and -",
+      "label": "Username"
+    }
+  }
+}

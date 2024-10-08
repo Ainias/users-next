@@ -1,23 +1,24 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { Request, Response } from 'express';
 import { PrepareOptions } from './PrepareOptions';
 import { checkServer } from './checkServer';
-import { DeviceWithUser } from '../../UserManagement/models/DeviceWithUser';
+import { DeviceWithUser } from '../../models/DeviceWithUser';
 
 export async function checkApi(
     data: {
-        req: NextApiRequest;
-        res: NextApiResponse;
+        req: Request;
+        res: Response;
     },
     options: {
         validateUser: false;
+        needsUser?: false;
         accesses?: undefined;
     },
 ): Promise<undefined>;
 
 export async function checkApi(
     data: {
-        req: NextApiRequest;
-        res: NextApiResponse;
+        req: Request;
+        res: Response;
     },
     options?: {
         validateUser: true;
@@ -27,8 +28,8 @@ export async function checkApi(
 ): Promise<DeviceWithUser | undefined>;
 export async function checkApi(
     data: {
-        req: NextApiRequest;
-        res: NextApiResponse;
+        req: Request;
+        res: Response;
     },
     options?:
         | {
@@ -44,8 +45,8 @@ export async function checkApi(
         req,
         res,
     }: {
-        req: NextApiRequest;
-        res: NextApiResponse;
+        req: Request;
+        res: Response;
     },
     options: PrepareOptions | string | string[] = { validateUser: true },
 ) {

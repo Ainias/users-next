@@ -1,5 +1,4 @@
 const path = require('path');
-
 const exec = require('child_process').exec;
 const fs = require('fs');
 
@@ -50,7 +49,7 @@ execPromise('npm pack')
         process.chdir('tmp');
         await execPromise('tar -xvzf ' + pathToTar + ' -C ./');
         process.chdir('package');
-        fs.unlinkSync('package.json');
+        //fs.unlinkSync('package.json');
 
         let promise = Promise.resolve();
         pathsToProjects.forEach((project) => {

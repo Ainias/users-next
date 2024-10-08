@@ -1,24 +1,17 @@
 import { UserManager } from '../../UserManagement/UserManager';
-import { getCookie } from 'cookies-next';
-import { NextApiRequest, NextApiResponse } from 'next';
-import { IncomingMessage, ServerResponse } from 'http';
 import { PrepareOptions } from './PrepareOptions';
-import { setServerUser } from '../../UserManagement/useUser';
 import { AuthorizationError } from '../../UserManagement/error/AuthorizationError';
+import type { Request, Response } from 'express';
+import { getDeviceFromRequest } from '../getDeviceFromRequest';
 
-export async function checkServer(
-    req: NextApiRequest | IncomingMessage,
-    res: NextApiResponse | ServerResponse,
-    options: PrepareOptions,
-) {
+export async function checkServer(req: Request, res: Response, options: PrepareOptions) {
     if (options.validateUser) {
-        const userManager = UserManager.getInstance();
-        const token = getCookie('token', { req, res }) as string;
-        if (token) {
-            try {
-                const [newToken, device] = await userManager.validateToken(token);
-                UserManager.setToken(newToken, device.user?.id ?? -1, req, res);
+        const newTokenData = await getDeviceFromRequest(req);
 
+        if (newTokenData) {
+            try {
+                const [newToken, device] = newTokenData;
+                UserManager.setToken(newToken, device.user?.id ?? -1, res);
                 // TODO cache accesses?
                 if (options.accesses) {
                     const neededAccesses = Array.isArray(options.accesses) ? options.accesses : [options.accesses];
@@ -33,23 +26,20 @@ export async function checkServer(
                         );
                     }
                 }
-                if (device?.user) {
-                    setServerUser(device.user);
-                }
 
                 return device;
             } catch (e) {
                 console.error('Got token error', e);
                 // Authorisation error should not delete the token, as the user is the user, but does not have the correct rights
                 if (!(e instanceof AuthorizationError)) {
-                    UserManager.deleteToken(req, res);
+                    UserManager.deleteToken(res);
                 }
                 throw e;
             }
         } else {
-            UserManager.deleteToken(req, res);
+            UserManager.deleteToken(res);
             if (options.needsUser) {
-                throw new Error('route needs user, but no token given');
+                throw new AuthorizationError('route needs user, but no token given');
             }
         }
     }

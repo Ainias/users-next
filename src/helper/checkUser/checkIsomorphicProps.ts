@@ -1,27 +1,27 @@
-import { NextPageContext } from 'next';
 import { PrepareOptions } from './PrepareOptions';
 import { checkServer } from './checkServer';
 import { useUserData } from '../../UserManagement/useUserData';
-import { User } from '../../UserManagement/models/User';
+import { User } from '../../models/User';
+import type { Request, Response } from 'express';
 
-export async function checkInitialProps(
-    data: Pick<NextPageContext, 'res' | 'req'>,
+export async function checkIsomorphicProps(
+    data: { req?: Request; res?: Response },
     options: {
         validateUser: false;
         accesses?: undefined;
     },
 ): Promise<undefined>;
 
-export async function checkInitialProps(
-    data: Pick<NextPageContext, 'res' | 'req'>,
+export async function checkIsomorphicProps(
+    data: { req?: Request; res?: Response },
     options?: {
         validateUser: true;
         needsUser?: false;
         accesses?: undefined;
     },
 ): Promise<User | undefined>;
-export async function checkInitialProps(
-    data: Pick<NextPageContext, 'res' | 'req'>,
+export async function checkIsomorphicProps(
+    data: { req?: Request; res?: Response },
     options?:
         | {
               validateUser: true;
@@ -32,8 +32,8 @@ export async function checkInitialProps(
         | string[],
 ): Promise<User>;
 
-export async function checkInitialProps(
-    { req, res }: Pick<NextPageContext, 'res' | 'req'>,
+export async function checkIsomorphicProps(
+    { req, res }: { req?: Request; res?: Response },
     options: PrepareOptions | string | string[] = { validateUser: true },
 ) {
     const realOptions: PrepareOptions =

@@ -1,31 +1,30 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
-import { SyncModel } from '@ainias42/typeorm-sync';
-import { GlobalRef } from '../../GlobalRef';
 import { Role } from './Role';
 import { Device } from './Device';
+import { BaseModel } from '@ainias42/typeorm-helper';
 
 @Entity('user')
-class User extends SyncModel {
+export class User extends BaseModel {
     @Column({ unique: true })
-    username: string;
+    username: string = '';
 
     @Column({ unique: true })
-    email: string;
+    email: string = '';
 
     @Column()
-    password: string;
+    password: string = '';
 
     @Column()
-    activated: boolean;
+    activated: boolean = false;
 
     @Column()
-    blocked: boolean;
+    blocked: boolean = false;
 
     @Column()
-    salt: string;
+    salt: string = '';
 
     @ManyToMany(() => Role)
-    @JoinTable({ name: 'userRole' })
+    @JoinTable({ name: 'user__role' })
     roles?: Role[];
 
     @OneToMany(() => Device, (device) => device.user)
@@ -34,7 +33,6 @@ class User extends SyncModel {
     toJSON() {
         return {
             ...this,
-            email: '',
             password: '',
             salt: '',
         };
@@ -42,11 +40,3 @@ class User extends SyncModel {
 }
 
 export type UserType = User;
-
-const Saved = new GlobalRef<typeof User>('model.User');
-if (!Saved.value()) {
-    Saved.setValue(User);
-}
-const GlobalUser = Saved.typedValue();
-type GlobalUser = User;
-export { GlobalUser as User };

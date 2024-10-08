@@ -1,9 +1,10 @@
-import { User } from './models/User';
+import { User } from '../models/User';
 import { createZustand } from '../helper/createZustand';
 
 const initialState = {
     user: undefined as User | undefined,
     accesses: [] as string[],
+    translate: ((key) => key) as (key: string, args?: Record<string, string | number>) => string,
 };
 
 type SetState = (
@@ -59,6 +60,12 @@ const actionsGenerator = (set: SetState, get: GetState) => ({
     },
     setAccesses(accesses: string[]) {
         set({ accesses });
+    },
+    setTranslate(translate: (key: string, args?: Record<string, string | number>) => string) {
+        set({ translate });
+    },
+    getTranslate() {
+        return get().translate;
     },
 });
 
