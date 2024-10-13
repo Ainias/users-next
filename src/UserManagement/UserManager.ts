@@ -7,6 +7,7 @@ import { ArrayHelper } from '@ainias42/js-helper';
 import { getRepository } from '@ainias42/typeorm-helper';
 import type { Response } from 'express';
 import { DeviceWithUser } from '../models/DeviceWithUser';
+import { AuthorizationError } from './error/AuthorizationError';
 
 const defaultUserManagerConfig = {
     saltLength: 12,
@@ -163,8 +164,7 @@ export class UserManager {
             const device = await deviceRepository.findOne(findOptions);
 
             if (!device) {
-                // TODO throw authentication error
-                throw new Error('wrong token error');
+                throw new AuthorizationError('Wrong token given', true);
             }
             device.lastActive = new Date();
             await deviceRepository.save(device);

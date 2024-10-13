@@ -39,10 +39,7 @@ const actionsGenerator = (set: SetState, get: GetState) => ({
 
         const cookieUserId = getCookieUserId();
         if (!cookieUserId || cookieUserId !== user?.id) {
-            set((old) => ({
-                user: old.user ? undefined : old.user,
-                accesses: old.accesses.length ? [] : old.accesses,
-            }));
+            get().logout();
         }
     },
     getUser() {
@@ -66,6 +63,12 @@ const actionsGenerator = (set: SetState, get: GetState) => ({
     },
     getTranslate() {
         return get().translate;
+    },
+    logout() {
+        set((old) => ({
+            user: old.user ? undefined : old.user,
+            accesses: old.accesses.length ? [] : old.accesses,
+        }));
     },
 });
 

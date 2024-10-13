@@ -1,6 +1,9 @@
 export class AuthorizationError extends Error {
-    constructor(message: string) {
+    isLoggedOut: boolean;
+
+    constructor(message: string, isLoggedOut: boolean) {
         super(message);
+        this.isLoggedOut = isLoggedOut;
         this.name = 'AuthorizationError';
     }
 }

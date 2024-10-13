@@ -6,10 +6,10 @@ import { getDeviceFromRequest } from '../getDeviceFromRequest';
 
 export async function checkServer(req: Request, res: Response, options: PrepareOptions) {
     if (options.validateUser) {
-        const newTokenData = await getDeviceFromRequest(req);
+        try {
+            const newTokenData = await getDeviceFromRequest(req);
 
-        if (newTokenData) {
-            try {
+            if (newTokenData) {
                 const [newToken, device] = newTokenData;
                 UserManager.setToken(newToken, device.user?.id ?? -1, res);
                 // TODO cache accesses?
@@ -23,24 +23,22 @@ export async function checkServer(req: Request, res: Response, options: PrepareO
                             `user with id ${device.user?.id} needed accesses '${neededAccesses.join(
                                 "', '",
                             )}' but got accesses '${accesses.join("', '")}'`,
+                            false,
                         );
                     }
                 }
 
                 return device;
-            } catch (e) {
-                console.error('Got token error', e);
-                // Authorisation error should not delete the token, as the user is the user, but does not have the correct rights
-                if (!(e instanceof AuthorizationError)) {
-                    UserManager.deleteToken(res);
-                }
-                throw e;
             }
-        } else {
-            UserManager.deleteToken(res);
+            
             if (options.needsUser) {
-                throw new AuthorizationError('route needs user, but no token given');
+                throw new AuthorizationError('route needs user, but no token given', true);
             }
+        } catch (e) {
+            if (e instanceof AuthorizationError && e.isLoggedOut) {
+                UserManager.deleteToken(res);
+            }
+            throw e;
         }
     }
     return undefined;
