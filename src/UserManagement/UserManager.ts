@@ -140,6 +140,14 @@ export class UserManager {
             .encrypt(new TextEncoder().encode(this.jwtSecret));
     }
 
+    generateChangeEmailToken(user: User, newEmail: string) {
+        return new EncryptJWT({ type: 'change-email', userId: user.id, version: user.version, newEmail })
+            .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
+            .setIssuedAt()
+            .setExpirationTime(this.config.activateTokenExpiresIn)
+            .encrypt(new TextEncoder().encode(this.jwtSecret));
+    }
+
     async validateToken(token: string) {
         const { payload } = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret))) as unknown as {
             payload: JWTPayload & ReturnType<typeof UserManager.getTokenPayload>;
@@ -221,6 +229,38 @@ export class UserManager {
         }
 
         user.activated = true;
+        await userRepository.save(user);
+        return user;
+    }
+
+    async changeEmail(token: string) {
+        const { payload } = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret))) as unknown as {
+            payload: JWTPayload & { type: 'change-email'; userId: number; version: number; newEmail: string };
+        };
+        if (payload.type !== 'change-email') {
+            // TODO better error
+            throw new Error('Wrong token type');
+        }
+
+        const userRepository = getRepository(User);
+        const user = await userRepository.findOneBy({ id: payload.userId });
+
+        if (!user) {
+            // TODO better error
+            throw new Error('User not found');
+        }
+
+        if (user.version !== payload.version) {
+            // TODO better error
+            throw new Error('Token is outdated!');
+        }
+
+        if (user.blocked) {
+            // TODO better error
+            throw new Error('User is blocked!');
+        }
+
+        user.email = payload.newEmail;
         await userRepository.save(user);
         return user;
     }
