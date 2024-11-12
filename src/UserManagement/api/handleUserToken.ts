@@ -1,8 +1,8 @@
-import { UserManager } from '../../UserManager';
 import type { Request, Response } from 'express';
-import { setUserLoggedIn } from '../login/setUserLoggedIn';
+import { UserManager } from '../UserManager';
+import { setUserLoggedIn } from './login/setUserLoggedIn';
 
-export type ActivateOptions =
+export type HandleUserTokenOptions =
     | {
           autoLogin?: false;
           req?: Request;
@@ -14,13 +14,14 @@ export type ActivateOptions =
           res: Response;
       };
 
-export async function activateUser(token: string, options?: ActivateOptions) {
+export async function handleUserToken(token: string, options?: HandleUserTokenOptions) {
     const userManager = UserManager.getInstance();
-    const user = await userManager.activateUser(token);
+    const { user, tokenType } = await userManager.handleToken(token);
 
     if (!options?.autoLogin) {
         return {
             user,
+            tokenType,
         };
     }
 
@@ -30,5 +31,6 @@ export async function activateUser(token: string, options?: ActivateOptions) {
     return {
         accesses,
         user,
+        tokenType,
     };
 }

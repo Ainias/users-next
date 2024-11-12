@@ -3,12 +3,13 @@ import { UserManager } from '../../UserManager';
 import { User } from '../../../models/User';
 import type { Request, Response } from 'express';
 import { getRepository } from '@ainias42/typeorm-helper';
+import { DateHelper } from '@ainias42/js-helper';
 
 export async function setUserLoggedIn(user: User, req: Request, res: Response) {
     const device = new Device();
     device.user = user;
     device.userAgent = req.headers['user-agent'] ?? '';
-    device.lastActive = new Date();
+    device.lastActive = DateHelper.newDate();
 
     const deviceRepository = getRepository(Device);
     await deviceRepository.save(device);

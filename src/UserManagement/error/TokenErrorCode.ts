@@ -1,0 +1,6 @@
+export enum TokenErrorCode {
+    WRONG_TYPE = 'WRONG_TYPE',
+    USER_NOT_FOUND = 'USER_NOT_FOUND',
+    USER_BLOCKED = 'USER_BLOCKED',
+    TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+}

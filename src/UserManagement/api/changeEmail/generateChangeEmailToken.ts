@@ -13,5 +13,6 @@ export async function generateChangeEmailToken(user: User, newEmail: string) {
 
     const userManager = UserManager.getInstance();
     const token = await userManager.generateChangeEmailToken(user, newEmail);
-    return { token, user };
+    const keepEmailToken = await userManager.generateKeepEmailToken(user);
+    return { token, user, keepEmailToken };
 }

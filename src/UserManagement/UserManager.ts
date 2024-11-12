@@ -1,20 +1,26 @@
-import { User } from '../models/User';
+import { User, UserType } from '../models/User';
 import * as crypto from 'crypto';
 import { EncryptJWT, jwtDecrypt, JWTPayload } from 'jose';
 import { Device } from '../models/Device';
 import { RoleManager } from './RoleManager';
-import { ArrayHelper } from '@ainias42/js-helper';
+import { ArrayHelper, DateHelper } from '@ainias42/js-helper';
 import { getRepository } from '@ainias42/typeorm-helper';
 import type { Response } from 'express';
 import { DeviceWithUser } from '../models/DeviceWithUser';
 import { AuthorizationError } from './error/AuthorizationError';
+import { UserTokenPayload } from './UserTokenPayload';
+import { TokenError } from './error/TokenError';
+import { TokenErrorCode } from './error/TokenErrorCode';
+import { UserError } from './error/UserError';
+import { UserErrorCode } from './error/UserErrorCode';
 
 const defaultUserManagerConfig = {
     saltLength: 12,
-    expiresIn: '7d',
-    activateTokenExpiresIn: '1d',
+    expiresIn: 7 * 60 * 60,
+    activateTokenExpiresIn: 60 * 60,
     recheckPasswordAfterSeconds: 60 * 5,
     userNeedsToBeActivated: true,
+    getTimestampInSeconds: () => Math.floor(DateHelper.now() / 1000),
 };
 export type UserManagerConfig = typeof defaultUserManagerConfig;
 
@@ -119,40 +125,50 @@ export class UserManager {
     generateTokenFor(device: Device) {
         return new EncryptJWT(UserManager.getTokenPayload(device))
             .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
-            .setIssuedAt()
-            .setExpirationTime(this.config.expiresIn)
+            .setIssuedAt(this.config.getTimestampInSeconds())
+            .setExpirationTime(this.config.getTimestampInSeconds() + this.config.expiresIn)
             .encrypt(new TextEncoder().encode(this.jwtSecret));
     }
 
     generateActivateToken(user: User) {
         return new EncryptJWT({ type: 'activate', userId: user.id, version: user.version })
             .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
-            .setIssuedAt()
-            .setExpirationTime(this.config.activateTokenExpiresIn)
+            .setIssuedAt(this.config.getTimestampInSeconds())
+            .setExpirationTime(this.config.getTimestampInSeconds() + this.config.activateTokenExpiresIn)
             .encrypt(new TextEncoder().encode(this.jwtSecret));
     }
 
     generateResetPasswordToken(user: User) {
         return new EncryptJWT({ type: 'reset-password', userId: user.id, version: user.version })
             .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
-            .setIssuedAt()
-            .setExpirationTime(this.config.activateTokenExpiresIn)
+            .setIssuedAt(this.config.getTimestampInSeconds())
+            .setExpirationTime(this.config.getTimestampInSeconds() + this.config.activateTokenExpiresIn)
             .encrypt(new TextEncoder().encode(this.jwtSecret));
     }
 
     generateChangeEmailToken(user: User, newEmail: string) {
         return new EncryptJWT({ type: 'change-email', userId: user.id, version: user.version, newEmail })
             .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
-            .setIssuedAt()
-            .setExpirationTime(this.config.activateTokenExpiresIn)
+            .setIssuedAt(this.config.getTimestampInSeconds())
+            .setExpirationTime(this.config.getTimestampInSeconds() + this.config.activateTokenExpiresIn)
+            .encrypt(new TextEncoder().encode(this.jwtSecret));
+    }
+
+    generateKeepEmailToken(user: User) {
+        return new EncryptJWT({ type: 'keep-email', userId: user.id, email: user.email })
+            .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
+            .setIssuedAt(this.config.getTimestampInSeconds())
+            .setExpirationTime(this.config.getTimestampInSeconds() + this.config.activateTokenExpiresIn)
             .encrypt(new TextEncoder().encode(this.jwtSecret));
     }
 
     async validateToken(token: string) {
-        const { payload } = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret))) as unknown as {
+        const { payload } = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret), {
+            currentDate: new Date(this.config.getTimestampInSeconds() * 1000),
+        })) as unknown as {
             payload: JWTPayload & ReturnType<typeof UserManager.getTokenPayload>;
         };
-        const nowInSeconds = Math.floor(new Date().getTime() / 1000);
+        const nowInSeconds = this.config.getTimestampInSeconds();
 
         if (nowInSeconds - (payload.iat ?? 0) > this.config.recheckPasswordAfterSeconds) {
             const findOptions = {
@@ -174,7 +190,7 @@ export class UserManager {
             if (!device) {
                 throw new AuthorizationError('Wrong token given', true);
             }
-            device.lastActive = new Date();
+            device.lastActive = new Date(this.config.getTimestampInSeconds() * 1000);
             await deviceRepository.save(device);
             return [await this.generateTokenFor(device), device as DeviceWithUser] as const;
         }
@@ -202,97 +218,112 @@ export class UserManager {
         return [token, device as DeviceWithUser] as const;
     }
 
-    async activateUser(token: string) {
-        const { payload } = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret))) as unknown as {
-            payload: JWTPayload & { type: 'activate'; userId: number; version: number };
-        };
-        if (payload.type !== 'activate') {
-            // TODO better error
-            throw new Error('Wrong token type');
+    async handleToken(token: string) {
+        let payload: UserTokenPayload;
+        try {
+            const data = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret), {
+                currentDate: new Date(this.config.getTimestampInSeconds() * 1000),
+            })) as unknown as {
+                payload: UserTokenPayload;
+            };
+            payload = data.payload;
+        } catch (error) {
+            console.error(error);
+            throw new TokenError(TokenErrorCode.TOKEN_EXPIRED, 'Token is expired!');
+        }
+
+        if (payload.type !== 'activate' && payload.type !== 'change-email' && payload.type !== 'keep-email') {
+            throw new TokenError(TokenErrorCode.WRONG_TYPE, 'Wrong token type');
         }
         const userRepository = getRepository(User);
         const user = await userRepository.findOneBy({ id: payload.userId });
 
         if (!user) {
-            // TODO better error
-            throw new Error('User not found');
+            throw new TokenError(TokenErrorCode.USER_NOT_FOUND, 'User not found');
         }
 
-        if (user.version !== payload.version) {
-            // TODO better error
-            throw new Error('Token is outdated!');
+        if (payload.version && user.version !== payload.version) {
+            throw new TokenError(TokenErrorCode.TOKEN_EXPIRED, 'Token is expired!');
         }
 
-        if (user.blocked) {
-            // TODO better error
-            throw new Error('User is blocked!');
+        switch (payload.type) {
+            case 'activate': {
+                if (user.blocked) {
+                    throw new TokenError(TokenErrorCode.USER_BLOCKED, 'User is blocked!');
+                }
+                user.activated = true;
+                break;
+            }
+            case 'change-email': {
+                if (user.blocked) {
+                    throw new TokenError(TokenErrorCode.USER_BLOCKED, 'User is blocked!');
+                }
+                user.email = payload.newEmail;
+                break;
+            }
+            case 'keep-email': {
+                // Update updatedAt in order to increase version, when email is not changed
+                // version-update invalidates other email-changing tokens
+                user.email = payload.email;
+                user.updatedAt = new Date(this.config.getTimestampInSeconds() * 1000);
+                break;
+            }
         }
 
-        user.activated = true;
         await userRepository.save(user);
-        return user;
+        return { user, tokenType: payload.type };
     }
 
-    async changeEmail(token: string) {
-        const { payload } = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret))) as unknown as {
-            payload: JWTPayload & { type: 'change-email'; userId: number; version: number; newEmail: string };
-        };
-        if (payload.type !== 'change-email') {
-            // TODO better error
-            throw new Error('Wrong token type');
+    async changePassword(user: UserType, oldPassword: string, newPassword: string) {
+        if (this.hashPassword(user, oldPassword) !== user.password) {
+            throw new UserError(UserErrorCode.WRONG_PASSWORD, 'Wrong password!');
         }
+
+        // Reset salt to renew it
+        user.salt = '';
+        user.password = this.hashPassword(user, newPassword);
 
         const userRepository = getRepository(User);
-        const user = await userRepository.findOneBy({ id: payload.userId });
-
-        if (!user) {
-            // TODO better error
-            throw new Error('User not found');
-        }
-
-        if (user.version !== payload.version) {
-            // TODO better error
-            throw new Error('Token is outdated!');
-        }
-
-        if (user.blocked) {
-            // TODO better error
-            throw new Error('User is blocked!');
-        }
-
-        user.email = payload.newEmail;
         await userRepository.save(user);
         return user;
     }
 
     async resetPassword(token: string, newPassword: string) {
-        const { payload } = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret))) as unknown as {
-            payload: JWTPayload & { type: 'reset-password'; userId: number; version: number };
-        };
+        let payload: (JWTPayload & { type: 'reset-password'; userId: number; version: number }) | undefined;
+        try {
+            const tokenData = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret), {
+                currentDate: new Date(this.config.getTimestampInSeconds() * 1000),
+            })) as unknown as {
+                payload: JWTPayload & { type: 'reset-password'; userId: number; version: number };
+            };
+            payload = tokenData.payload;
+        } catch (error) {
+            throw new TokenError(TokenErrorCode.TOKEN_EXPIRED, 'Token is expired!');
+        }
         if (payload.type !== 'reset-password') {
-            // TODO better error
-            throw new Error('Wrong token type');
+            throw new TokenError(TokenErrorCode.WRONG_TYPE, 'Wrong token type');
         }
 
         const userRepository = getRepository(User);
         const user = await userRepository.findOneBy({ id: payload.userId });
 
         if (!user) {
-            // TODO better error
-            throw new Error('User not found');
+            throw new TokenError(TokenErrorCode.USER_NOT_FOUND, 'User not found');
         }
 
         if (user.version !== payload.version) {
-            // TODO better error
-            throw new Error('Token is outdated!');
+            throw new TokenError(TokenErrorCode.TOKEN_EXPIRED, 'Token is expired!');
         }
 
         if (user.blocked) {
-            // TODO better error
-            throw new Error('User is blocked!');
+            throw new TokenError(TokenErrorCode.USER_BLOCKED, 'User is blocked!');
         }
 
+        // Activate user for those, where the user lost the activation mail
         user.activated = true;
+
+        // Reset salt to renew it
+        user.salt = '';
         user.password = this.hashPassword(user, newPassword);
         await userRepository.save(user);
         return user;
