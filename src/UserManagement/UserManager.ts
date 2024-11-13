@@ -163,11 +163,20 @@ export class UserManager {
     }
 
     async validateToken(token: string) {
-        const { payload } = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret), {
-            currentDate: new Date(this.config.getTimestampInSeconds() * 1000),
-        })) as unknown as {
-            payload: JWTPayload & ReturnType<typeof UserManager.getTokenPayload>;
-        };
+        let payload: JWTPayload & ReturnType<typeof UserManager.getTokenPayload>;
+        try {
+            const data = (await jwtDecrypt(token, new TextEncoder().encode(this.jwtSecret), {
+                currentDate: new Date(this.config.getTimestampInSeconds() * 1000),
+            })) as unknown as {
+                payload: JWTPayload & ReturnType<typeof UserManager.getTokenPayload>;
+            };
+            payload = data.payload;
+        } catch (error) {
+            if (typeof error === 'object' && error?.name === 'JWTExpired') {
+                throw new AuthorizationError('Token expired', true);
+            }
+            throw error;
+        }
         const nowInSeconds = this.config.getTimestampInSeconds();
 
         if (nowInSeconds - (payload.iat ?? 0) > this.config.recheckPasswordAfterSeconds) {
