@@ -1,6 +1,6 @@
 {
   "registration": {
-    "success": "You are successfully registrated!. Please check your E-Mails."
+    "success": "You are successfully registrated! Please check your E-Mails."
   },
   "reset-password": {
     "send": {

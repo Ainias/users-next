@@ -16,8 +16,8 @@ import { UserErrorCode } from './error/UserErrorCode';
 
 const defaultUserManagerConfig = {
     saltLength: 12,
-    expiresIn: 7 * 60 * 60,
-    activateTokenExpiresIn: 60 * 60,
+    expiresIn: 60 * 60 * 24 * 7,
+    activateTokenExpiresIn: 60 * 60 * 24,
     recheckPasswordAfterSeconds: 60 * 5,
     userNeedsToBeActivated: true,
     getTimestampInSeconds: () => Math.floor(DateHelper.now() / 1000),
