@@ -208,9 +208,9 @@ export class UserManager {
         device.id = payload.deviceId;
         device.userAgent = payload.userAgent;
         device.lastActive = new Date(payload.lastActive);
-        device.deletedAt = payload.deviceDeletedAt ? new Date(payload.deviceDeletedAt) : undefined;
-        device.createdAt = payload.deviceCreatedAt ? new Date(payload.deviceCreatedAt) : undefined;
-        device.updatedAt = payload.deviceUpdatedAt ? new Date(payload.deviceUpdatedAt) : undefined;
+        device.deletedAt = payload.deviceDeletedAt ? new Date(payload.deviceDeletedAt) : null;
+        device.createdAt = new Date(payload.deviceCreatedAt ?? 0);
+        device.updatedAt = new Date(payload.deviceUpdatedAt ?? 0);
 
         device.user = new User();
         device.user.id = payload.userId;
@@ -220,9 +220,9 @@ export class UserManager {
         device.user.activated = payload.activated;
         device.user.blocked = payload.blocked;
 
-        device.user.deletedAt = payload.userDeletedAt ? new Date(payload.userDeletedAt) : undefined;
-        device.user.createdAt = payload.userCreatedAt ? new Date(payload.userCreatedAt) : undefined;
-        device.user.updatedAt = payload.userUpdatedAt ? new Date(payload.userUpdatedAt) : undefined;
+        device.user.deletedAt = payload.userDeletedAt ? new Date(payload.userDeletedAt) : null;
+        device.user.createdAt = new Date(payload.userCreatedAt ?? 0);
+        device.user.updatedAt = new Date(payload.userUpdatedAt ?? 0);
 
         return [token, device as DeviceWithUser] as const;
     }

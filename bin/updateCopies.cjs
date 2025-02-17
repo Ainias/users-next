@@ -4,7 +4,10 @@ const fs = require('fs');
 
 const packageName = require('../package.json').name;
 
-let pathsToProjects = ['/Users/sguenter/Projekte/Privat/dnd'];
+let pathsToProjects = [
+    '/Users/sguenter/Projekte/Privat/dnd',
+    '/Users/sguenter/Projekte/Privat/bat'
+];
 
 const deleteFolderRecursive = function (path) {
     if (fs.existsSync(path)) {
