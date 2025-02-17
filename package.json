@@ -1,6 +1,6 @@
 {
   "name": "@ainias42/users-next",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "User Management for express-app",
   "main": "dist/commonjs/users-next.js",
   "exports": {
