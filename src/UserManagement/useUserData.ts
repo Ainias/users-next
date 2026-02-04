@@ -1,8 +1,8 @@
-import { User } from '../models/User';
 import { createZustand } from '../helper/createZustand';
+import { UserJson } from '../models/UserJson';
 
 const initialState = {
-    user: undefined as User | undefined,
+    user: undefined as UserJson | undefined,
     accesses: [] as string[],
     translate: ((key) => key) as (key: string, args?: Record<string, string | number>) => string,
 };
@@ -43,16 +43,14 @@ const actionsGenerator = (set: SetState, get: GetState) => ({
         }
     },
     getUser() {
-        get().checkUser();
         const { user } = get();
         return user;
     },
     getAccesses() {
-        get().checkUser();
         const { accesses } = get();
         return accesses;
     },
-    setUser(user: User | undefined) {
+    setUser(user: UserJson | undefined) {
         set({ user });
     },
     setAccesses(accesses: string[]) {

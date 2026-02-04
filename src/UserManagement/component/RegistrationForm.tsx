@@ -97,7 +97,7 @@ export const RegistrationForm = withMemo(function RegistrationForm({ registratio
     }
 
     return (
-        <HookForm {...methods} onSend={doRegistration}>
+        <HookForm {...methods}>
             <Grid>
                 <GridItem size={12} md={6}>
                     <InputController name="username" label={t('user.username.label')} />

@@ -8,7 +8,7 @@ export async function getDeviceFromRequest(req: Request) {
         throw new Error('No cookies found in request. Are you sure you are using cookie-parser?');
     }
 
-    const {token} = req.cookies;
+    const token = req.cookies[userManager.getTokenCookieName()];
 
     if (token) {
         if (req.device) {

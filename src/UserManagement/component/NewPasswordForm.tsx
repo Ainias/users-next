@@ -85,7 +85,7 @@ export const NewPasswordForm = withMemo(function NewPasswordForm({ token, resetP
     }
 
     return (
-        <HookForm {...methods} onSend={doResetPassword}>
+        <HookForm {...methods}>
             <Grid>
                 <GridItem size={12} md={6}>
                     <PasswordInputController name="password" label={t('user.password.label')} />

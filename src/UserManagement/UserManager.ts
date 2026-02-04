@@ -21,6 +21,11 @@ const defaultUserManagerConfig = {
     recheckPasswordAfterSeconds: 60 * 5,
     userNeedsToBeActivated: true,
     getTimestampInSeconds: () => Math.floor(DateHelper.now() / 1000),
+    cookieConfig: {
+        domain: undefined as string | undefined,
+        userIdName: 'userId',
+        tokenName: 'token',
+    },
 };
 export type UserManagerConfig = typeof defaultUserManagerConfig;
 
@@ -50,24 +55,28 @@ export class UserManager {
 
     static setToken(token: string, userId: number, res: Response) {
         const time = 1000 * 60 * 60 * 24 * 7;
+        const { cookieConfig } = UserManager.getInstance().config;
 
         // HTTP-Only or a XXS attack can steal the token
-        res.cookie('token', token, {
+        res.cookie(cookieConfig.tokenName, token, {
             httpOnly: true,
             maxAge: time,
             secure: process.env.NODE_ENV !== 'development',
+            domain: cookieConfig.domain,
         });
 
-        res.cookie('userId', userId, {
+        res.cookie(cookieConfig.userIdName, userId, {
             httpOnly: false,
             maxAge: time,
             secure: process.env.NODE_ENV !== 'development',
+            domain: cookieConfig.domain,
         });
     }
 
     static deleteToken(res: Response) {
-        res.clearCookie('token');
-        res.clearCookie('userId');
+        const { cookieConfig } = UserManager.getInstance().config;
+        res.clearCookie(cookieConfig.tokenName);
+        res.clearCookie(cookieConfig.userIdName);
     }
 
     static getTokenPayload(device: Device) {
@@ -107,6 +116,10 @@ export class UserManager {
         const accesses = (await UserManager.findAccessesForUserId(userId)).map((a) => a.name);
         const accessSet = new Set(accesses);
         return accessNames.every((a) => accessSet.has(a));
+    }
+
+    getTokenCookieName() {
+        return this.config.cookieConfig.tokenName;
     }
 
     hashPassword(user: User, password: string) {
@@ -336,6 +349,10 @@ export class UserManager {
         user.password = this.hashPassword(user, newPassword);
         await userRepository.save(user);
         return user;
+    }
+
+    updateConfig(config: Partial<UserManagerConfig>) {
+        this.config = { ...this.config, ...config };
     }
 
     private generateSalt() {

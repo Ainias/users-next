@@ -3,6 +3,7 @@ export * from './models/Device';
 export * from './models/DeviceWithUser';
 export * from './models/Role';
 export * from './models/User';
+export * from './models/UserJson';
 export * from './models/userModels';
 export * from './models/migrations/1000000010000-InitialUserModels';
 export * from './models/migrations/1724784318837-UpdateTableNames';

@@ -31,8 +31,9 @@ export class User extends BaseModel {
     devices?: Device[];
 
     toJSON() {
+        const { toJSON: _unused, ...jsonObj } = this;
         return {
-            ...this,
+            ...jsonObj,
             password: '',
             salt: '',
         };

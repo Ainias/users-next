@@ -76,7 +76,7 @@ export const LoginForm = withMemo(function LoginForm({ login }: LoginFormProps) 
     }
 
     return (
-        <HookForm {...methods} onSend={doLogin}>
+        <HookForm {...methods}>
             <Grid columns={1}>
                 <InputController label={t('user.email-or-username.label')} name="emailOrUsername" />
                 <PasswordInputController label={t('user.password.label')} name="password" />
