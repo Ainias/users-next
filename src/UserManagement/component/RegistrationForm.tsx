@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useCallback, useState } from 'react';
+import { ReactNode, useCallback, useState } from 'react';
 import {
     Block,
     Button,
@@ -34,9 +34,13 @@ export type RegistrationFormProps = {
         email: string;
         password: string;
     }) => Promise<{ success: false; errors?: URecord<string, string> } | { success: true }>;
+    extraFields?: () => ReactNode;
 };
 
-export const RegistrationForm = withMemo(function RegistrationForm({ registration }: RegistrationFormProps) {
+export const RegistrationForm = withMemo(function RegistrationForm({
+    registration,
+    extraFields,
+}: RegistrationFormProps) {
     // Refs
 
     // States/Variables/Selectors
@@ -98,7 +102,7 @@ export const RegistrationForm = withMemo(function RegistrationForm({ registratio
 
     return (
         <HookForm {...methods}>
-            <Grid>
+            <Grid __allowChildren={'all'}>
                 <GridItem size={12} md={6}>
                     <InputController name="username" label={t('user.username.label')} />
                 </GridItem>
@@ -111,6 +115,7 @@ export const RegistrationForm = withMemo(function RegistrationForm({ registratio
                 <GridItem size={12} md={6}>
                     <PasswordInputController name="passwordConfirm" label={t('user.password.repeat.label')} />
                 </GridItem>
+                {extraFields?.()}
                 <GridItem size={12}>
                     <Button onClick={doRegistration} fullWidth={true}>
                         <Text>{t('user.registration.label')}</Text>
