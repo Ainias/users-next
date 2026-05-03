@@ -30,15 +30,20 @@ export async function checkServer(req: Request, res: Response, options: PrepareO
 
                 return device;
             }
-            
+
             if (options.needsUser) {
                 throw new AuthorizationError('route needs user, but no token given', true);
             }
-        } catch (e) {
-            if (e instanceof AuthorizationError && e.isLoggedOut) {
+        } catch (error) {
+            if (error instanceof AuthorizationError && error.isLoggedOut) {
                 UserManager.deleteToken(res);
             }
-            throw e;
+
+            if (options.needsUser || error instanceof AuthorizationError) {
+                throw error;
+            } else {
+                console.error('Error while validating user', error);
+            }
         }
     }
     return undefined;

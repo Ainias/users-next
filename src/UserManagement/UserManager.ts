@@ -75,8 +75,16 @@ export class UserManager {
 
     static deleteToken(res: Response) {
         const { cookieConfig } = UserManager.getInstance().config;
-        res.clearCookie(cookieConfig.tokenName);
-        res.clearCookie(cookieConfig.userIdName);
+        res.clearCookie(cookieConfig.tokenName, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV !== 'development',
+            domain: cookieConfig.domain,
+        });
+        res.clearCookie(cookieConfig.userIdName, {
+            httpOnly: false,
+            secure: process.env.NODE_ENV !== 'development',
+            domain: cookieConfig.domain,
+        });
     }
 
     static getTokenPayload(device: Device) {
