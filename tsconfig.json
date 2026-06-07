@@ -1,46 +1,22 @@
 {
-  "compilerOptions": {
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "alwaysStrict": true,
-    "baseUrl": "./src",
-    "declaration": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "isolatedModules": true,
-    "lib": [
-      "es6",
-      "es2016",
-      "es2017",
-      "es2021",
-      "dom"
-    ],
-    "module": "esnext",
-    "moduleResolution": "node",
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedParameters": true,
-    "outDir": "./dist/esm",
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "strict": false,
-    "strictFunctionTypes": false,
-    "strictNullChecks": true,
-    "target": "es6",
-    "jsx": "react"
-  },
-  "include": [
-    "./src/**/*.ts",
-    "./src/**/*.tsx"
-  ],
-  "exclude": [
-    "dist",
-    "bin",
-    "node_modules"
-  ],
-  "tsc-alias": {
-    "resolveFullPaths": true
-  }
+    "extends": "@ainias42/config/tsconfig.json",
+    "compilerOptions": {
+        "moduleResolution": "bundler",
+        "noFallthroughCasesInSwitch": true,
+        "noEmit": true,
+        "typeRoots": ["node_modules/@types", "node_modules/react-bootstrap-mobile/src/types"]
+    },
+    "include": ["./**/*", "./**/*"],
+    "exclude": ["./test/**/*"],
+    "ts-node": {
+        "experimentalResolverFeatures": true,
+        "compilerOptions": {
+            "moduleResolution": "bundler",
+            "module": "commonjs",
+            "esModuleInterop": true,
+            "types": ["node"]
+        },
+        // Do not forget to `npm i -D tsconfig-paths`
+        "require": ["tsconfig-paths/register"]
+    }
 }

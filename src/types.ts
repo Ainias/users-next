@@ -1,4 +1,4 @@
-import { DeviceWithUser } from './models/DeviceWithUser';
+import type { DeviceWithUser } from './models/DeviceWithUser';
 
 declare module 'express' {
     interface Request {

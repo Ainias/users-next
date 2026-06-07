@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class UpdateTableNames1724784318837 implements MigrationInterface {
     name = 'UpdateTableNames1724784318837';

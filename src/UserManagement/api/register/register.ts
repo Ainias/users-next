@@ -1,9 +1,9 @@
-import { User } from '../../../models/User';
-import { Role } from '../../../models/Role';
-import { UserManager } from '../../UserManager';
-import { QueryFailedError } from 'typeorm';
 import { DuplicateError } from './DuplicateError';
+import { QueryFailedError } from 'typeorm';
+import { User } from '../../../models/User';
+import { UserManager } from '../../UserManager';
 import { getRepository } from '@ainias42/typeorm-helper';
+import type { Role } from '../../../models/Role';
 
 export async function register(
     email: string,
@@ -37,7 +37,7 @@ export async function register(
             } else if (error.message.startsWith(`Duplicate entry '${username}`)) {
                 throw new DuplicateError('Username', username);
             }
-            throw new Error('Username or email already taken');
+            throw Object.assign(new Error('Username or email already taken'), { cause: error });
         }
         throw error;
     }

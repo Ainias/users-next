@@ -6,7 +6,6 @@ export async function generateResetPasswordToken(email: string) {
     const userRepository = await getRepository(User);
     const user = await userRepository.findOneBy({ email });
     if (!user) {
-        // TODO Better error
         throw new Error('User not found');
     }
 

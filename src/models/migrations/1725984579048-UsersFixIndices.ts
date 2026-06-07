@@ -1,5 +1,6 @@
 /* eslint-disable class-methods-use-this */
-import { MigrationInterface, QueryRunner, TableForeignKey, TableIndex } from 'typeorm';
+import { TableForeignKey, TableIndex } from 'typeorm';
+import type { MigrationInterface, QueryRunner} from 'typeorm';
 
 export class UsersFixIndices1725984579048 implements MigrationInterface {
     name = 'UsersFixIndices1725984579048';

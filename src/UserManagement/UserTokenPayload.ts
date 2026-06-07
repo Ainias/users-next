@@ -1,4 +1,4 @@
-import { JWTPayload } from 'jose';
+import type { JWTPayload } from 'jose';
 
 export type ActivateUserTokenPayload = JWTPayload & { type: 'activate'; userId: number; version: number };
 export type ChangeEmailTokenPayload = JWTPayload & {

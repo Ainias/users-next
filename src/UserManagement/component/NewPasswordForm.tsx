@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useCallback, useState } from 'react';
 import {
     Block,
     Button,
@@ -10,14 +9,16 @@ import {
     Text,
     withMemo,
 } from '@ainias42/react-bootstrap-mobile';
-import { useForm } from 'react-hook-form';
-import { InferType, object } from 'yup';
-import { useT } from '../../i18n/useT';
-import { URecord } from '@ainias42/js-helper';
-import { useYupResolver } from '../../useYupResolver';
+import { object } from 'yup';
 import { passwordValidation } from '../validation/passwordValidation';
-import { User } from '../../models/User';
+import { useCallback, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useT } from '../../i18n/useT';
 import { useUserData } from '../useUserData';
+import { useYupResolver } from '../../useYupResolver';
+import type { InferType } from 'yup';
+import type { URecord } from '@ainias42/js-helper';
+import type { User } from '../../models/User';
 
 const newPasswordSchema = object({
     ...passwordValidation,
@@ -35,7 +36,7 @@ export type NewPasswordFormProps = {
     >;
 };
 
-export const NewPasswordForm = withMemo(function NewPasswordForm({ token, resetPassword }: NewPasswordFormProps) {
+export const NewPasswordForm = withMemo(function NewPasswordFormComponent({ token, resetPassword }: NewPasswordFormProps) {
     // Refs
 
     // States/Variables/Selectors

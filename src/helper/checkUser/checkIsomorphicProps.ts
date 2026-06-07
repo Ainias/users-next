@@ -1,8 +1,10 @@
-import { PrepareOptions } from './PrepareOptions';
 import { checkServer } from './checkServer';
 import { useUserData } from '../../UserManagement/useUserData';
-import { User } from '../../models/User';
+import type { PrepareOptions } from './PrepareOptions';
 import type { Request, Response } from 'express';
+import type { User } from '../../models/User';
+
+const defaultCheckIsomorphicPropsOptions: PrepareOptions = { validateUser: true };
 
 export async function checkIsomorphicProps(
     data: { req?: Request; res?: Response },
@@ -34,7 +36,7 @@ export async function checkIsomorphicProps(
 
 export async function checkIsomorphicProps(
     { req, res }: { req?: Request; res?: Response },
-    options: PrepareOptions | string | string[] = { validateUser: true },
+    options: PrepareOptions | string | string[] = defaultCheckIsomorphicPropsOptions,
 ) {
     const realOptions: PrepareOptions =
         typeof options === 'string' || Array.isArray(options)
@@ -53,7 +55,6 @@ export async function checkIsomorphicProps(
 
     // Client
     if (realOptions.validateUser && realOptions.needsUser && !useUserData.getState().getUser()) {
-        // TODO change error to UserError/ValidationError
         throw new Error('user not logged in, but route need logged in user!');
     }
     if (realOptions.accesses) {

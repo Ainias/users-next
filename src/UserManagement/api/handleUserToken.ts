@@ -1,6 +1,6 @@
-import type { Request, Response } from 'express';
 import { UserManager } from '../UserManager';
 import { setUserLoggedIn } from './login/setUserLoggedIn';
+import type { Request, Response } from 'express';
 
 export type HandleUserTokenOptions =
     | {

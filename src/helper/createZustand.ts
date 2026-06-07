@@ -1,5 +1,7 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist, PersistOptions } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import type { PersistOptions } from 'zustand/middleware';
+import type { StateCreator } from 'zustand';
 
 type SetState<Type> = (
     newState: Type | Partial<Type> | ((state: Type) => Type | Partial<Type>),
@@ -11,10 +13,11 @@ export function createZustand<Type>(
     creator: (set: SetState<Type>, get: GetState<Type>) => Type,
     persistOptions: PersistOptions<Type> | string,
 ) {
-    const storage = typeof window !== 'undefined' ? createJSONStorage(() => window.localStorage) : undefined;
+    const storage = typeof window !== 'undefined' ? createJSONStorage<Type>(() => window.localStorage) : undefined;
+    const persistedCreator = creator as StateCreator<Type, [['zustand/persist', unknown]], []>;
     return create<Type>()(
         persist(
-            creator,
+            persistedCreator,
             typeof persistOptions === 'string'
                 ? {
                       name: persistOptions,

@@ -1,5 +1,5 @@
-import { useUserData } from '../UserManagement/useUserData';
 import { useMemo } from 'react';
+import { useUserData } from '../UserManagement/useUserData';
 
 export function useT(): { t: (key: string, args?: Record<string, string | number>) => string } {
     const translateFunc = useUserData((s) => s.getTranslate());

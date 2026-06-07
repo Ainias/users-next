@@ -1,4 +1,4 @@
-import { TokenErrorCode } from './TokenErrorCode';
+import type { TokenErrorCode } from './TokenErrorCode';
 
 export class TokenError extends Error {
     code: TokenErrorCode;

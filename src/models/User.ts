@@ -1,7 +1,7 @@
-import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
-import { Role } from './Role';
-import { Device } from './Device';
 import { BaseModel } from '@ainias42/typeorm-helper';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
+import { Device } from './Device';
+import { Role } from './Role';
 
 @Entity('user')
 export class User extends BaseModel {

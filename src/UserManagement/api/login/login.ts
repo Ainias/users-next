@@ -1,8 +1,8 @@
-import type { Request, Response } from 'express';
 import { User } from '../../../models/User';
 import { UserManager } from '../../UserManager';
-import { setUserLoggedIn } from './setUserLoggedIn';
 import { getRepository } from '@ainias42/typeorm-helper';
+import { setUserLoggedIn } from './setUserLoggedIn';
+import type { Request, Response } from 'express';
 
 export type LoginResponseData =
     | {

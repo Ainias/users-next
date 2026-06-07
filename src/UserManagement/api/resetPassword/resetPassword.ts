@@ -1,6 +1,6 @@
 import { UserManager } from '../../UserManager';
-import type { Request, Response } from 'express';
 import { setUserLoggedIn } from '../login/setUserLoggedIn';
+import type { Request, Response } from 'express';
 
 export type ResetPasswordOptions =
     | {

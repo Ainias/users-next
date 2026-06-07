@@ -1,6 +1,4 @@
-import { useUserData } from '../useUserData';
 import * as React from 'react';
-import { useCallback } from 'react';
 import {
     Block,
     Button,
@@ -11,12 +9,15 @@ import {
     Text,
     withMemo,
 } from '@ainias42/react-bootstrap-mobile';
-import { LoginResponseData } from '../api/login/login';
-import { useUser } from '../useUser';
-import { useT } from '../../i18n/useT';
+import { object, string } from 'yup';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { InferType, object, string } from 'yup';
+import { useT } from '../../i18n/useT';
+import { useUser } from '../useUser';
+import { useUserData } from '../useUserData';
 import { useYupResolver } from '../../useYupResolver';
+import type { InferType } from 'yup';
+import type { LoginResponseData } from '../api/login/login';
 
 const loginSchema = object({
     emailOrUsername: string().required(),
@@ -25,7 +26,7 @@ const loginSchema = object({
 
 export type LoginFormProps = { login: (emailOrUsername: string, password: string) => Promise<LoginResponseData> };
 
-export const LoginForm = withMemo(function LoginForm({ login }: LoginFormProps) {
+export const LoginForm = withMemo(function LoginFormComponent({ login }: LoginFormProps) {
     // Refs
 
     // States/Variables/Selectors

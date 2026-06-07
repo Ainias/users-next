@@ -1,18 +1,22 @@
-import { User, UserType } from '../models/User';
 import * as crypto from 'crypto';
-import { EncryptJWT, jwtDecrypt, JWTPayload } from 'jose';
-import { Device } from '../models/Device';
-import { RoleManager } from './RoleManager';
 import { ArrayHelper, DateHelper } from '@ainias42/js-helper';
-import { getRepository } from '@ainias42/typeorm-helper';
-import type { Response } from 'express';
-import { DeviceWithUser } from '../models/DeviceWithUser';
 import { AuthorizationError } from './error/AuthorizationError';
-import { UserTokenPayload } from './UserTokenPayload';
+import { Device } from '../models/Device';
+import { EncryptJWT, jwtDecrypt } from 'jose';
+import { RoleManager } from './RoleManager';
 import { TokenError } from './error/TokenError';
 import { TokenErrorCode } from './error/TokenErrorCode';
+import { User } from '../models/User';
 import { UserError } from './error/UserError';
 import { UserErrorCode } from './error/UserErrorCode';
+import { getRepository } from '@ainias42/typeorm-helper';
+import type { Access } from '../models/Access';
+import type { DeviceWithUser } from '../models/DeviceWithUser';
+import type { JWTPayload } from 'jose';
+import type { Response } from 'express';
+import type { Role } from '../models/Role';
+import type { UserTokenPayload } from './UserTokenPayload';
+import type { UserType } from '../models/User';
 
 const defaultUserManagerConfig = {
     saltLength: 12,
@@ -108,20 +112,29 @@ export class UserManager {
         };
     }
 
-    static async findAccessesForUserId(userId: number) {
-        const userRepository = getRepository(User);
-        const user = await userRepository.findOne({ where: { id: userId }, relations: ['roles', 'roles.accesses'] });
+    static async findAccessesForUserId(userId: number): Promise<Access[]> {
+        const userRepository = getRepository<User>(User);
+        const user = await userRepository.findOne({
+            where: { id: userId },
+            relations: {
+                roles: {
+                    accesses: true,
+                },
+            },
+        });
         if (!user?.roles) {
             return [];
         }
+        const roles = user.roles as Role[];
         const accessesForRoles = ArrayHelper.noUndefined(
-            await Promise.all(user.roles.map((role) => RoleManager.findAccessesForRole(role))),
+            await Promise.all(roles.map((role) => RoleManager.findAccessesForRole(role))),
         );
         return accessesForRoles.flat();
     }
 
     static async hasAccesses(userId: number, accessNames: string[]) {
-        const accesses = (await UserManager.findAccessesForUserId(userId)).map((a) => a.name);
+        const userAccesses = await UserManager.findAccessesForUserId(userId);
+        const accesses = userAccesses.map((a) => a.name);
         const accessSet = new Set(accesses);
         return accessNames.every((a) => accessSet.has(a));
     }
@@ -193,7 +206,7 @@ export class UserManager {
             };
             payload = data.payload;
         } catch (error) {
-            if (typeof error === 'object' && error?.name === 'JWTExpired') {
+            if (error instanceof Error && error.name === 'JWTExpired') {
                 throw new AuthorizationError('Token expired', true);
             }
             throw error;
@@ -211,7 +224,9 @@ export class UserManager {
                         activated: this.config.userNeedsToBeActivated ? true : undefined,
                     },
                 },
-                relations: ['user'],
+                relations: {
+                    user: true,
+                },
             };
 
             const deviceRepository = getRepository(Device);
@@ -327,7 +342,7 @@ export class UserManager {
                 payload: JWTPayload & { type: 'reset-password'; userId: number; version: number };
             };
             payload = tokenData.payload;
-        } catch (error) {
+        } catch (_error) {
             throw new TokenError(TokenErrorCode.TOKEN_EXPIRED, 'Token is expired!');
         }
         if (payload.type !== 'reset-password') {

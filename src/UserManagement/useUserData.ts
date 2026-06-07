@@ -1,5 +1,5 @@
 import { createZustand } from '../helper/createZustand';
-import { UserJson } from '../models/UserJson';
+import type { UserJson } from '../models/UserJson';
 
 const initialState = {
     user: undefined as UserJson | undefined,
@@ -17,6 +17,7 @@ type SetState = (
     replace?: boolean,
 ) => void;
 type GetState = () => Readonly<UserState> & typeof initialState;
+type UserDataState = UserState & typeof initialState;
 
 function getCookieUserId() {
     if (typeof window === 'undefined') {
@@ -71,7 +72,7 @@ const actionsGenerator = (set: SetState, get: GetState) => ({
 });
 
 export type UserState = ReturnType<typeof actionsGenerator>;
-export const useUserData = createZustand<UserState>(
+export const useUserData = createZustand<UserDataState>(
     (set, get) => ({
         ...initialState,
         ...actionsGenerator(set, get as GetState),
@@ -79,21 +80,6 @@ export const useUserData = createZustand<UserState>(
     {
         name: 'user',
         version: 0,
-        getStorage: () => ({
-            getItem: (...args) => {
-                if (typeof window === 'undefined') {
-                    return null;
-                }
-                return window.localStorage.getItem(...args);
-            },
-            setItem: (...args) => {
-                if (typeof window === 'undefined') {
-                    return;
-                }
-                window.localStorage.setItem(...args);
-            },
-            removeItem: (...args) => window.localStorage.removeItem(...args),
-        }),
     },
 );
 

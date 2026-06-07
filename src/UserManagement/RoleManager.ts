@@ -1,7 +1,7 @@
-import { Role } from '../models/Role';
 import { ArrayHelper } from '@ainias42/js-helper';
-import { Access } from '../models/Access';
+import { Role } from '../models/Role';
 import { getRepository } from '@ainias42/typeorm-helper';
+import type { Access } from '../models/Access';
 
 export class RoleManager {
     private static instance: RoleManager;
@@ -14,12 +14,12 @@ export class RoleManager {
     }
 
     static async findAccessesForRole(role: Role): Promise<Access[]> {
-        const { accesses } = role;
+        const { accesses, id } = role;
 
         const roleRepository = getRepository(Role);
         const parentRoles = await roleRepository.find({
-            where: { children: { id: role.id } },
-            relations: ['accesses'],
+            where: { children: { id } },
+            relations: { accesses: true },
         });
         const parentAccesses = await Promise.all(
             parentRoles.map(async (parentRole) => RoleManager.findAccessesForRole(parentRole)),

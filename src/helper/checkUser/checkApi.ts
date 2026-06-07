@@ -1,7 +1,9 @@
-import type { Request, Response } from 'express';
-import { PrepareOptions } from './PrepareOptions';
 import { checkServer } from './checkServer';
-import { DeviceWithUser } from '../../models/DeviceWithUser';
+import type { DeviceWithUser } from '../../models/DeviceWithUser';
+import type { PrepareOptions } from './PrepareOptions';
+import type { Request, Response } from 'express';
+
+const defaultCheckApiOptions: PrepareOptions = { validateUser: true };
 
 export async function checkApi(
     data: {
@@ -48,7 +50,7 @@ export async function checkApi(
         req: Request;
         res: Response;
     },
-    options: PrepareOptions | string | string[] = { validateUser: true },
+    options: PrepareOptions | string | string[] = defaultCheckApiOptions,
 ) {
     const realOptions: PrepareOptions =
         typeof options === 'string' || Array.isArray(options)

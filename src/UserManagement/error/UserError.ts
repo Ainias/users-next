@@ -1,4 +1,4 @@
-import { UserErrorCode } from './UserErrorCode';
+import type { UserErrorCode } from './UserErrorCode';
 
 export class UserError extends Error {
     code: UserErrorCode;

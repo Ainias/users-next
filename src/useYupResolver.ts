@@ -1,6 +1,7 @@
+import { ValidationError } from 'yup';
 import { useCallback } from 'react';
 import { useUserData } from './UserManagement/useUserData';
-import { AnyObject, InferType, Maybe, ObjectSchema, ValidationError } from 'yup';
+import type { AnyObject, InferType, Maybe, ObjectSchema } from 'yup';
 
 export function useYupResolver<ObjectType extends Maybe<AnyObject>>(validationSchema: ObjectSchema<ObjectType>) {
     const translate = useUserData((s) => s.getTranslate());
@@ -16,8 +17,11 @@ export function useYupResolver<ObjectType extends Maybe<AnyObject>>(validationSc
                     values,
                     errors: {},
                 };
-            } catch (errors) {
-                const reducedErrors = (errors.inner as ValidationError[]).reduce(
+            } catch (error) {
+                if (!(error instanceof ValidationError)) {
+                    throw error;
+                }
+                const reducedErrors = (error.inner as ValidationError[]).reduce(
                     (allErrors, currentError) => {
                         if (currentError.path === undefined) {
                             return allErrors;

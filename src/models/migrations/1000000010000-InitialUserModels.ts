@@ -1,6 +1,7 @@
 /* eslint-disable class-methods-use-this */
-import { MigrationInterface, QueryRunner, Table } from 'typeorm';
+import { Table } from 'typeorm';
 import { getCreateTableColumnsV1 } from '@ainias42/typeorm-helper';
+import type { MigrationInterface, QueryRunner} from 'typeorm';
 
 export class InitialUserModels1000000010000 implements MigrationInterface {
     name = 'InitialUserModels1000000010000';

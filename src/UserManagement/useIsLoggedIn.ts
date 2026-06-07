@@ -1,6 +1,6 @@
-import { useUserData } from './useUserData';
-import { useRequest } from '@ainias42/express-app';
 import { UserManager } from './UserManager';
+import { useRequest } from '@ainias42/express-app';
+import { useUserData } from './useUserData';
 
 export function useIsLoggedIn() {
     if (typeof window === 'undefined') {

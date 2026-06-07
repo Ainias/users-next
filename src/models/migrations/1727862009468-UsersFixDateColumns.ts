@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class UsersFixDateColumns1727862009468 implements MigrationInterface {
     name = 'UsersFixDateColumns1727862009468';

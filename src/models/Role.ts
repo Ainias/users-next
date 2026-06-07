@@ -1,6 +1,6 @@
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { Access } from './Access';
 import { BaseModel } from '@ainias42/typeorm-helper';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 
 @Entity('role')
 export class Role extends BaseModel {

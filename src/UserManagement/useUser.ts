@@ -1,5 +1,5 @@
-import { useUserData } from './useUserData';
 import { useRequest } from '@ainias42/express-app';
+import { useUserData } from './useUserData';
 
 export function useUser() {
     if (typeof window === 'undefined') {

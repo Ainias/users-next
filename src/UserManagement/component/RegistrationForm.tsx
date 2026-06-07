@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { ReactNode, useCallback, useState } from 'react';
 import {
     Block,
     Button,
@@ -11,14 +10,17 @@ import {
     Text,
     withMemo,
 } from '@ainias42/react-bootstrap-mobile';
-import { useUser } from '../useUser';
-import { useForm } from 'react-hook-form';
-import { InferType, object, string } from 'yup';
-import { useT } from '../../i18n/useT';
-import { URecord } from '@ainias42/js-helper';
-import { useYupResolver } from '../../useYupResolver';
+import { object, string } from 'yup';
 import { passwordValidation } from '../validation/passwordValidation';
+import { useCallback, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useT } from '../../i18n/useT';
+import { useUser } from '../useUser';
+import { useYupResolver } from '../../useYupResolver';
 import { usernameSchema } from './usernameSchema';
+import type { InferType } from 'yup';
+import type { ReactNode } from 'react';
+import type { URecord } from '@ainias42/js-helper';
 
 const registerSchema = object({
     username: usernameSchema,
@@ -37,7 +39,7 @@ export type RegistrationFormProps = {
     extraFields?: () => ReactNode;
 };
 
-export const RegistrationForm = withMemo(function RegistrationForm({
+export const RegistrationForm = withMemo(function RegistrationFormComponent({
     registration,
     extraFields,
 }: RegistrationFormProps) {
@@ -102,7 +104,7 @@ export const RegistrationForm = withMemo(function RegistrationForm({
 
     return (
         <HookForm {...methods}>
-            <Grid __allowChildren={'all'}>
+            <Grid __allowChildren="all">
                 <GridItem size={12} md={6}>
                     <InputController name="username" label={t('user.username.label')} />
                 </GridItem>

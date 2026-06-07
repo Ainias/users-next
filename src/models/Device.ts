@@ -1,7 +1,7 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
-import { User, type UserType } from './User';
 import { BaseModel } from '@ainias42/typeorm-helper';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { DateHelper } from '@ainias42/js-helper';
+import { User, type UserType } from './User';
 
 @Entity('device')
 export class Device extends BaseModel {
