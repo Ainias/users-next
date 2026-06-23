@@ -5,18 +5,18 @@
     "main": "dist/commonjs/users-next.js",
     "exports": {
         ".": {
-            "import": "./dist/esm/users-next.js",
-            "require": "./dist/commonjs/users-next.js"
+            "types": "./dist/users-next.d.ts",
+            "import": "./dist/users-next.js"
         },
         "./models": {
-            "import": "./dist/esm/models.js",
-            "require": "./dist/commonjs/models.js"
+            "types": "./dist/models.d.ts",
+            "import": "./dist/models.js"
         }
     },
+    "type": "module",
     "scripts": {
-        "build:esm": "tsc && tsc-alias",
-        "build:commonjs": "tsc -p tsconfig.commonjs.json && tsc-alias -p tsconfig.commonjs.json",
-        "build": "ctix build && npm run build:esm && npm run build:commonjs",
+        "build:esm": "tsc",
+        "build": "ctix build && npm run build:esm",
         "update-packages": "npm run build && node bin/updateCopies.cjs",
         "typecheck": "tsc --noEmit",
         "lint:no-cache": "eslint \"src/{**/*,*}.{js,jsx,tsx,ts}\"",

@@ -9,6 +9,7 @@ import {
     Text,
     withMemo,
 } from '@ainias42/react-bootstrap-mobile';
+import { HiddenSubmitButton } from './HiddenSubmitButton';
 import { object } from 'yup';
 import { passwordValidation } from '../validation/passwordValidation';
 import { useCallback, useState } from 'react';
@@ -36,7 +37,10 @@ export type NewPasswordFormProps = {
     >;
 };
 
-export const NewPasswordForm = withMemo(function NewPasswordFormComponent({ token, resetPassword }: NewPasswordFormProps) {
+export const NewPasswordForm = withMemo(function NewPasswordFormComponent({
+    token,
+    resetPassword,
+}: NewPasswordFormProps) {
     // Refs
 
     // States/Variables/Selectors
@@ -70,6 +74,13 @@ export const NewPasswordForm = withMemo(function NewPasswordFormComponent({ toke
             [methods, resetPassword, setAccesses, setUser, token],
         ),
     );
+    const handleResetPasswordSubmit = useCallback(
+        async (event: React.FormEvent<HTMLFormElement>) => {
+            event.preventDefault();
+            await doResetPassword();
+        },
+        [doResetPassword],
+    );
 
     // Effects
 
@@ -86,20 +97,23 @@ export const NewPasswordForm = withMemo(function NewPasswordFormComponent({ toke
     }
 
     return (
-        <HookForm {...methods}>
-            <Grid>
-                <GridItem size={12} md={6}>
-                    <PasswordInputController name="password" label={t('user.password.label')} />
-                </GridItem>
-                <GridItem size={12} md={6}>
-                    <PasswordInputController name="passwordConfirm" label={t('user.password.repeat.label')} />
-                </GridItem>
-                <GridItem size={12}>
-                    <Button onClick={doResetPassword} fullWidth={true}>
-                        <Text>{t('reset-password.send.label')}</Text>
-                    </Button>
-                </GridItem>
-            </Grid>
-        </HookForm>
+        <form onSubmit={handleResetPasswordSubmit}>
+            <HookForm {...methods}>
+                <Grid>
+                    <GridItem size={12} md={6}>
+                        <PasswordInputController name="password" label={t('user.password.label')} />
+                    </GridItem>
+                    <GridItem size={12} md={6}>
+                        <PasswordInputController name="passwordConfirm" label={t('user.password.repeat.label')} />
+                    </GridItem>
+                    <GridItem size={12}>
+                        <Button onClick={doResetPassword} fullWidth={true}>
+                            <Text>{t('reset-password.send.label')}</Text>
+                        </Button>
+                    </GridItem>
+                    <HiddenSubmitButton />
+                </Grid>
+            </HookForm>
+        </form>
     );
 });

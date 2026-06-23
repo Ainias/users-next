@@ -14,11 +14,16 @@ export async function checkServer(req: Request, res: Response, options: PrepareO
                 UserManager.setToken(newToken, device.user?.id ?? -1, res);
                 if (options.accesses) {
                     const neededAccesses = Array.isArray(options.accesses) ? options.accesses : [options.accesses];
-                    if (!(await UserManager.hasAccesses(device.user?.id ?? 1, neededAccesses))) {
+
+                    const isAuthorized = options.needsAllAccesses
+                        ? await UserManager.hasAccesses(device.user?.id ?? 1, neededAccesses)
+                        : await UserManager.hasAtLeastOneAccesses(device.user?.id ?? 1, neededAccesses);
+
+                    if (!isAuthorized) {
                         const userAccesses = await UserManager.findAccessesForUserId(device.user?.id ?? -1);
                         const accesses = userAccesses.map((a) => a.name);
                         throw new AuthorizationError(
-                            `user with id ${device.user?.id} needed accesses '${neededAccesses.join(
+                            `user with id ${device.user?.id} needed ${options.needsAllAccesses ? '' : 'one of '}accesses '${neededAccesses.join(
                                 "', '",
                             )}' but got accesses '${accesses.join("', '")}'`,
                             false,

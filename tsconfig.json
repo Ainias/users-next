@@ -3,20 +3,12 @@
     "compilerOptions": {
         "moduleResolution": "bundler",
         "noFallthroughCasesInSwitch": true,
-        "noEmit": true,
-        "typeRoots": ["node_modules/@types", "node_modules/react-bootstrap-mobile/src/types"]
+        "typeRoots": ["node_modules/@types", "node_modules/react-bootstrap-mobile/src/types"],
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "noEmit": false,
+        "declaration": true
     },
-    "include": ["./**/*", "./**/*"],
-    "exclude": ["./test/**/*"],
-    "ts-node": {
-        "experimentalResolverFeatures": true,
-        "compilerOptions": {
-            "moduleResolution": "bundler",
-            "module": "commonjs",
-            "esModuleInterop": true,
-            "types": ["node"]
-        },
-        // Do not forget to `npm i -D tsconfig-paths`
-        "require": ["tsconfig-paths/register"]
-    }
+    "include": ["src/**/*"],
+    "exclude": ["./test/**/*"]
 }

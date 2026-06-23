@@ -139,6 +139,13 @@ export class UserManager {
         return accessNames.every((a) => accessSet.has(a));
     }
 
+    static async hasAtLeastOneAccesses(userId: number, accessNames: string[]) {
+        const userAccesses = await UserManager.findAccessesForUserId(userId);
+        const accesses = userAccesses.map((a) => a.name);
+        const accessSet = new Set(accesses);
+        return accessNames.some((a) => accessSet.has(a));
+    }
+
     getTokenCookieName() {
         return this.config.cookieConfig.tokenName;
     }

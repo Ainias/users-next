@@ -9,6 +9,7 @@ import {
     Text,
     withMemo,
 } from '@ainias42/react-bootstrap-mobile';
+import { HiddenSubmitButton } from './HiddenSubmitButton';
 import { object, string } from 'yup';
 import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
@@ -61,6 +62,13 @@ export const LoginForm = withMemo(function LoginFormComponent({ login }: LoginFo
             [login, setAccesses, setUser],
         ),
     );
+    const handleLoginSubmit = useCallback(
+        async (event: React.FormEvent<HTMLFormElement>) => {
+            event.preventDefault();
+            await doLogin();
+        },
+        [doLogin],
+    );
 
     // Effects
 
@@ -77,14 +85,17 @@ export const LoginForm = withMemo(function LoginFormComponent({ login }: LoginFo
     }
 
     return (
-        <HookForm {...methods}>
-            <Grid columns={1}>
-                <InputController label={t('user.email-or-username.label')} name="emailOrUsername" />
-                <PasswordInputController label={t('user.password.label')} name="password" />
-                <Button onClick={doLogin} fullWidth={true}>
-                    <Text>{t('user.login.label')}</Text>
-                </Button>
-            </Grid>
-        </HookForm>
+        <form onSubmit={handleLoginSubmit}>
+            <HookForm {...methods}>
+                <Grid columns={1}>
+                    <InputController label={t('user.email-or-username.label')} name="emailOrUsername" />
+                    <PasswordInputController label={t('user.password.label')} name="password" />
+                    <Button onClick={doLogin} fullWidth={true}>
+                        <Text>{t('user.login.label')}</Text>
+                    </Button>
+                    <HiddenSubmitButton />
+                </Grid>
+            </HookForm>
+        </form>
     );
 });

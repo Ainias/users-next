@@ -10,6 +10,7 @@ import {
     Text,
     withMemo,
 } from '@ainias42/react-bootstrap-mobile';
+import { HiddenSubmitButton } from './HiddenSubmitButton';
 import { object, string } from 'yup';
 import { passwordValidation } from '../validation/passwordValidation';
 import { useCallback, useState } from 'react';
@@ -79,6 +80,13 @@ export const RegistrationForm = withMemo(function RegistrationFormComponent({
             [methods, registration],
         ),
     );
+    const handleRegistrationSubmit = useCallback(
+        async (event: React.FormEvent<HTMLFormElement>) => {
+            event.preventDefault();
+            await doRegistration();
+        },
+        [doRegistration],
+    );
 
     // Effects
 
@@ -103,27 +111,30 @@ export const RegistrationForm = withMemo(function RegistrationFormComponent({
     }
 
     return (
-        <HookForm {...methods}>
-            <Grid __allowChildren="all">
-                <GridItem size={12} md={6}>
-                    <InputController name="username" label={t('user.username.label')} />
-                </GridItem>
-                <GridItem size={12} md={6}>
-                    <InputController name="email" label={t('user.email.label')} />
-                </GridItem>
-                <GridItem size={12} md={6}>
-                    <PasswordInputController name="password" label={t('user.password.label')} />
-                </GridItem>
-                <GridItem size={12} md={6}>
-                    <PasswordInputController name="passwordConfirm" label={t('user.password.repeat.label')} />
-                </GridItem>
-                {extraFields?.()}
-                <GridItem size={12}>
-                    <Button onClick={doRegistration} fullWidth={true}>
-                        <Text>{t('user.registration.label')}</Text>
-                    </Button>
-                </GridItem>
-            </Grid>
-        </HookForm>
+        <form onSubmit={handleRegistrationSubmit}>
+            <HookForm {...methods}>
+                <Grid __allowChildren="all">
+                    <GridItem size={12} md={6}>
+                        <InputController name="username" label={t('user.username.label')} />
+                    </GridItem>
+                    <GridItem size={12} md={6}>
+                        <InputController name="email" label={t('user.email.label')} />
+                    </GridItem>
+                    <GridItem size={12} md={6}>
+                        <PasswordInputController name="password" label={t('user.password.label')} />
+                    </GridItem>
+                    <GridItem size={12} md={6}>
+                        <PasswordInputController name="passwordConfirm" label={t('user.password.repeat.label')} />
+                    </GridItem>
+                    {extraFields?.()}
+                    <GridItem size={12}>
+                        <Button onClick={doRegistration} fullWidth={true}>
+                            <Text>{t('user.registration.label')}</Text>
+                        </Button>
+                    </GridItem>
+                    <HiddenSubmitButton />
+                </Grid>
+            </HookForm>
+        </form>
     );
 });
