@@ -8,3 +8,5 @@ node_modules/*
 /src/users-next.ts
 
 dist
+
+tsconfig.tsbuildinfo

@@ -31,10 +31,10 @@
     },
     "devDependencies": {
         "@ainias42/config": "^1.2.0",
-        "@ainias42/express-app": "^0.4.2",
+        "@ainias42/express-app": "^0.4.3",
         "@ainias42/js-helper": "^0.9.1",
-        "@ainias42/react-bootstrap-mobile": "^1.1.2",
-        "@ainias42/typeorm-helper": "^0.1.0",
+        "@ainias42/react-bootstrap-mobile": "^1.2.0",
+        "@ainias42/typeorm-helper": "^0.1.1",
         "@types/express": "^5.0.6",
         "@types/node": "^22.19.20",
         "@types/react": "^19.2.17",
